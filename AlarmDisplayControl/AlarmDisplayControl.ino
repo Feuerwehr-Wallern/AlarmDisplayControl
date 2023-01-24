@@ -1,74 +1,106 @@
+// Freiwillige Feuerwehr Wallern
+// Infopoint Monitorsteuerung
+// Date 08/2022
+// Author HBM Stefan Schneebauer
+// Author HBM Stefan Pflüglmayer
+
 #include <SoftwareSerial.h>
 
-#define BwgPin 4
-#define BwgPin2 5
-#define AlarmPin 2
-#define AusgerPin 3
-#define LedPin 13
+// ## Defines #####################################################
+#define ALARM_PIN 2
+#define AUSGER_PIN 3
+#define BWG1_PIN 4
+#define BWG2_PIN 5
+#define USERLED1_PIN 13
+#define USERLED2_PIN A0
 
+#define CYCLE_TIME 200       // Schleifenzeit in ms
+#define TV_OVERRUN_TIME 60  // Nachlaufzeit in s  600
+#define TV_ON_BLOCK_TIME 10  // Wiedereinschalten blockieren in s
+
+// ## Global Variables ############################################
 SoftwareSerial TVSerial(10, 11); // RX, TX
 
-int TvOnTime=300; // in Sekunden
+byte message_TV_on[]  = {0x6B, 0x61, 0x20, 0x30, 0x30, 0x20, 0x30, 0x31, 0x0D};
+byte message_TV_off[] = {0x6B, 0x61, 0x20, 0x30, 0x30, 0x20, 0x30, 0x30, 0x0D};
 
-int BwgVal = 0;
-int BwgVal2 = 0;
-int AlarmVal = 0;
-int AusgerVal = 0;
-int cnt =0; // 3600=1h
-boolean TvPreState = false;
+unsigned long startTime = 0;
+unsigned long actTime = 0;
+boolean tvState = false;
+boolean blocked = false;
 
+boolean motionDetected = false;
+boolean alarmVal = false;
+boolean ausgerVal = false;
+
+
+// ################################################################
+// ## Setup #######################################################
+// ################################################################
 void setup() {
-TVSerial.begin(9600);
-Serial.begin(115200);
+  TVSerial.begin(9600);
+  Serial.begin(9600);
 
-pinMode(BwgPin, INPUT);
-pinMode(BwgPin2, INPUT);
-digitalWrite(BwgPin, LOW);
-digitalWrite(BwgPin2, LOW);
-pinMode(AlarmPin, INPUT);
-digitalWrite(AlarmPin, LOW);
-pinMode(AusgerPin, INPUT);
-digitalWrite(AusgerPin, LOW);
-pinMode(LedPin, OUTPUT);
+  pinMode(ALARM_PIN, INPUT);
+  pinMode(AUSGER_PIN, INPUT);
+  pinMode(BWG1_PIN, INPUT);
+  pinMode(BWG2_PIN, INPUT);
+  pinMode(USERLED1_PIN, OUTPUT);
+  pinMode(USERLED2_PIN, OUTPUT);
+  
+  digitalWrite(ALARM_PIN, LOW);
+  digitalWrite(AUSGER_PIN, LOW);
+  digitalWrite(BWG1_PIN, LOW);
+  digitalWrite(BWG2_PIN, LOW);
+  digitalWrite(USERLED1_PIN, LOW);
+  digitalWrite(USERLED2_PIN, LOW);
 
-TvPreState = false;
-Serial.println("Setup done");
+  Serial.println("Setup done");
 }
 
+
+// ################################################################
+// ## Loop ########################################################
+// ################################################################
 void loop() {
-  BwgVal = digitalRead(BwgPin);
-  BwgVal2 = digitalRead(BwgPin2);
-  AlarmVal = digitalRead(AlarmPin);
-  AusgerVal = digitalRead(AusgerPin);
-  byte message_TV_on[]  = {0x6B, 0x61, 0x20, 0x30, 0x30, 0x20, 0x30, 0x31, 0x0D};
-  byte message_TV_off[] = {0x6B, 0x61, 0x20, 0x30, 0x30, 0x20, 0x30, 0x30, 0x0D};
-  
-  if ((BwgVal == HIGH or BwgVal2 == HIGH or AlarmVal==HIGH or AusgerVal==HIGH) and TvPreState==false) {
-    //Einschalten
+  actTime = millis();
+  alarmVal = digitalRead(ALARM_PIN);
+  ausgerVal = digitalRead(AUSGER_PIN);
+  motionDetected = digitalRead(BWG1_PIN) or digitalRead(BWG2_PIN);
+
+  if (!tvState and !blocked and (motionDetected or alarmVal or ausgerVal)) {      // TV Einschalten
     TVSerial.write(message_TV_on, sizeof(message_TV_on));
-    Serial.println("TV - EIN");
-    TvPreState = true; // TV Status : EIN
-  } 
-  else if ((BwgVal == HIGH or BwgVal2 == HIGH or AlarmVal==HIGH or AusgerVal==HIGH) and TvPreState==true) {
-    cnt=0;
-    //Serial.println("Counter Reset");
-  }
-  if ((BwgVal == LOW and BwgVal2 == LOW and AlarmVal==LOW and AusgerVal==LOW) and TvPreState==true){
-    delay(1000);
-    cnt=cnt+1;
-    Serial.println("Counter: " + String(cnt));
+    Serial.println("TV - ON");
+    tvState = true;
+    startTime = actTime;
   
-    if (cnt>=TvOnTime) { //Nachlaufschleife beenden wenn Max. Zeit erreicht
-      //Ausschalten
+  } else if (tvState and !blocked and (motionDetected or alarmVal or ausgerVal)) {
+    startTime = actTime;
+  }
+
+  if (tvState and (actTime - startTime >= (unsigned long) TV_OVERRUN_TIME * 1000)) {   // TV Ausschalten
       TVSerial.write(message_TV_off, sizeof(message_TV_off));
       Serial.println("TV - OFF");
-      TvPreState = false; // TV Status : AUS
-      cnt=0;
-    }
+      tvState = false;
+      blocked = true;
+      startTime = actTime;
   }
-  if (BwgVal == HIGH or BwgVal2 == HIGH) {
-    digitalWrite(LedPin, HIGH);
-  } else {
-    digitalWrite(LedPin, LOW);
+
+  if (blocked and (actTime - startTime >= (unsigned long) TV_ON_BLOCK_TIME * 1000)) {
+    blocked = false;
   }
-  }
+
+  /*Serial.print("StartTime: ");
+  Serial.print(startTime);
+  Serial.print(" Time: ");
+  Serial.print(actTime);
+  Serial.print(" DiffTime: ");
+  Serial.print(actTime-startTime);
+  Serial.print(" State: ");
+  Serial.println(tvState);*/
+  
+  digitalWrite(USERLED2_PIN, motionDetected);
+  digitalWrite(USERLED1_PIN, tvState);
+
+  delay(CYCLE_TIME);
+}
