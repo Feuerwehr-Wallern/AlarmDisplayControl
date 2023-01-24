@@ -69,11 +69,14 @@ void loop() {
   alarmVal = digitalRead(ALARM_PIN);
   ausgerVal = digitalRead(AUSGER_PIN);
   motionDetected = digitalRead(BWG1_PIN) or digitalRead(BWG2_PIN);
+  readRS232Data("Allg.");
 
   if (!tvState and !blocked and (motionDetected or alarmVal or ausgerVal)) {      // TV Einschalten
     TVSerial.write(message_TV1_on, sizeof(message_TV1_on));
+    readRS232Data("TV1-ON");
     delay(300);
     TVSerial.write(message_TV2_on, sizeof(message_TV2_on));
+    readRS232Data("TV2-ON");
     Serial.println("TV - ON");
     tvState = true;
     startTime = actTime;
@@ -96,8 +99,10 @@ void loop() {
 
   if (tvState and (actTime - startTime >= (unsigned long) TV_OVERRUN_TIME * 1000)) {   // TV Ausschalten
       TVSerial.write(message_TV1_off, sizeof(message_TV1_off));
+      readRS232Data("TV1-OFF");
       delay(300);
       TVSerial.write(message_TV2_off, sizeof(message_TV2_off));
+      readRS232Data("TV2-OFF");
       Serial.println("TV - OFF");
       tvState = false;
       blocked = true;
@@ -119,6 +124,24 @@ void loop() {
   
   digitalWrite(USERLED2_PIN, motionDetected);
   digitalWrite(USERLED1_PIN, tvState);
-
   delay(CYCLE_TIME);
+}
+
+const int BUFFER_SIZE = 100;
+
+void readRS232Data(String TVChan) {
+  delay(300);
+  if(TVSerial.available()){
+    byte buf[BUFFER_SIZE];
+    int rlen = TVSerial.readBytes(buf, BUFFER_SIZE);
+    Serial.print("Received [HEX]: ");
+    for(int i=0; i<rlen; i++){
+      Serial.print("0x");
+      Serial.print(buf[i],HEX);
+      Serial.print(", ");
+    }
+    Serial.print(" --> ");
+    Serial.print(rlen);
+    Serial.println(" Bytes empfangen!");
+  }
 }
