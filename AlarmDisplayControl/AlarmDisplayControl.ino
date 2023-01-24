@@ -15,14 +15,16 @@
 #define USERLED2_PIN A0
 
 #define CYCLE_TIME 200       // Schleifenzeit in ms
-#define TV_OVERRUN_TIME 60  // Nachlaufzeit in s  600
+#define TV_OVERRUN_TIME 600  // Nachlaufzeit in s  600
 #define TV_ON_BLOCK_TIME 10  // Wiedereinschalten blockieren in s
 
 // ## Global Variables ############################################
 SoftwareSerial TVSerial(10, 11); // RX, TX
 
-byte message_TV_on[]  = {0x6B, 0x61, 0x20, 0x30, 0x30, 0x20, 0x30, 0x31, 0x0D};
-byte message_TV_off[] = {0x6B, 0x61, 0x20, 0x30, 0x30, 0x20, 0x30, 0x30, 0x0D};
+byte message_TV1_on[]  = {0x6B, 0x61, 0x20, 0x30, 0x31, 0x20, 0x30, 0x31, 0x0D};
+byte message_TV2_on[]  = {0x6B, 0x61, 0x20, 0x30, 0x32, 0x20, 0x30, 0x31, 0x0D};
+byte message_TV1_off[] = {0x6B, 0x61, 0x20, 0x30, 0x31, 0x20, 0x30, 0x30, 0x0D};
+byte message_TV2_off[] = {0x6B, 0x61, 0x20, 0x30, 0x32, 0x20, 0x30, 0x30, 0x0D};
 
 unsigned long startTime = 0;
 unsigned long actTime = 0;
@@ -69,17 +71,33 @@ void loop() {
   motionDetected = digitalRead(BWG1_PIN) or digitalRead(BWG2_PIN);
 
   if (!tvState and !blocked and (motionDetected or alarmVal or ausgerVal)) {      // TV Einschalten
-    TVSerial.write(message_TV_on, sizeof(message_TV_on));
+    TVSerial.write(message_TV1_on, sizeof(message_TV1_on));
+    delay(300);
+    TVSerial.write(message_TV2_on, sizeof(message_TV2_on));
     Serial.println("TV - ON");
     tvState = true;
     startTime = actTime;
   
   } else if (tvState and !blocked and (motionDetected or alarmVal or ausgerVal)) {
     startTime = actTime;
+    if (digitalRead(BWG1_PIN)==1){
+    Serial.println("Melder 1: Bewegung erkannt");
+  }
+  if (digitalRead(BWG2_PIN)==1){
+    Serial.println("Melder 2: Bewegung erkannt");
+  }
+  if (digitalRead(ALARM_PIN)==1){
+    Serial.println("Status: Alarmiert");
+  }
+  if (digitalRead(AUSGER_PIN)==1){
+    Serial.println("Status: Ausgerueckt");
+  }
   }
 
   if (tvState and (actTime - startTime >= (unsigned long) TV_OVERRUN_TIME * 1000)) {   // TV Ausschalten
-      TVSerial.write(message_TV_off, sizeof(message_TV_off));
+      TVSerial.write(message_TV1_off, sizeof(message_TV1_off));
+      delay(300);
+      TVSerial.write(message_TV2_off, sizeof(message_TV2_off));
       Serial.println("TV - OFF");
       tvState = false;
       blocked = true;
