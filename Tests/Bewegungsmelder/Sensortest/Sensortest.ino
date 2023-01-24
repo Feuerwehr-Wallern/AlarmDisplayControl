@@ -1,4 +1,5 @@
 /* Example code for HC-SR501 PIR motion sensor with Arduino. More info: www.www.makerguides.com */
+// i was here
 
 // Define connection pins:
 #define pirPin 2
