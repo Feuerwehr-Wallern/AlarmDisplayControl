@@ -11,15 +11,16 @@
 #define AUSGER_PIN 3
 #define BWG1_PIN 4
 #define BWG2_PIN 5
-#define USERLED1_PIN 13
-#define USERLED2_PIN A0
+#define BWG3_PIN 6
+#define USERLED1_PIN 12   // ext.
+#define USERLED2_PIN 13   // int
 
 #define CYCLE_TIME 200       // Schleifenzeit in ms
 #define TV_OVERRUN_TIME 600  // Nachlaufzeit in s  600
 #define TV_ON_BLOCK_TIME 10  // Wiedereinschalten blockieren in s
 
 // ## Global Variables ############################################
-SoftwareSerial TVSerial(10, 11); // RX, TX
+SoftwareSerial TVSerial(10, 11); // RX, TX (shield, do not cross!)
 
 byte message_TV1_on[]  = {0x6B, 0x61, 0x20, 0x30, 0x31, 0x20, 0x30, 0x31, 0x0D};
 byte message_TV2_on[]  = {0x6B, 0x61, 0x20, 0x30, 0x32, 0x20, 0x30, 0x31, 0x0D};
@@ -47,6 +48,7 @@ void setup() {
   pinMode(AUSGER_PIN, INPUT);
   pinMode(BWG1_PIN, INPUT);
   pinMode(BWG2_PIN, INPUT);
+  pinMode(BWG3_PIN, INPUT);
   pinMode(USERLED1_PIN, OUTPUT);
   pinMode(USERLED2_PIN, OUTPUT);
   
