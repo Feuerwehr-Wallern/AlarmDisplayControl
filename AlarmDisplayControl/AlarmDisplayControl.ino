@@ -16,7 +16,7 @@
 #define USERLED2_PIN 13   // int
 
 #define CYCLE_TIME 200       // Schleifenzeit in ms
-#define TV_OVERRUN_TIME 60  // Nachlaufzeit in s  600
+#define TV_OVERRUN_TIME 600  // Nachlaufzeit in s  600
 #define TV_ON_BLOCK_TIME 10  // Wiedereinschalten blockieren in s
 
 // ## Global Variables ############################################
