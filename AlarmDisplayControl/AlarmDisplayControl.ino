@@ -1,14 +1,14 @@
 // Freiwillige Feuerwehr Wallern
 // Infopoint Monitorsteuerung
-// Date 08/2022
+// Date 02/2023
 // Author HBM Stefan Schneebauer
 // Author HBM Stefan Pflüglmayer
 
 #include <SoftwareSerial.h>
 
 // ## Defines #####################################################
-#define ALARM_PIN 2
-#define AUSGER_PIN 3
+#define AUSGER_PIN 2
+#define ALARM_PIN 3
 #define BWG1_PIN 4
 #define BWG2_PIN 5
 #define BWG3_PIN 6
@@ -16,7 +16,7 @@
 #define USERLED2_PIN 13   // int
 
 #define CYCLE_TIME 200       // Schleifenzeit in ms
-#define TV_OVERRUN_TIME 600  // Nachlaufzeit in s  600
+#define TV_OVERRUN_TIME 60  // Nachlaufzeit in s  600
 #define TV_ON_BLOCK_TIME 10  // Wiedereinschalten blockieren in s
 
 // ## Global Variables ############################################
@@ -52,10 +52,14 @@ void setup() {
   pinMode(USERLED1_PIN, OUTPUT);
   pinMode(USERLED2_PIN, OUTPUT);
   
-  digitalWrite(ALARM_PIN, LOW);
-  digitalWrite(AUSGER_PIN, LOW);
+  //digitalWrite(ALARM_PIN, LOW);
+  //digitalWrite(AUSGER_PIN, LOW);
   digitalWrite(BWG1_PIN, LOW);
   digitalWrite(BWG2_PIN, LOW);
+  digitalWrite(BWG2_PIN, LOW);
+  digitalWrite(USERLED1_PIN, HIGH);
+  digitalWrite(USERLED2_PIN, HIGH);
+  delay(500);
   digitalWrite(USERLED1_PIN, LOW);
   digitalWrite(USERLED2_PIN, LOW);
 
@@ -70,7 +74,7 @@ void loop() {
   actTime = millis();
   alarmVal = digitalRead(ALARM_PIN);
   ausgerVal = digitalRead(AUSGER_PIN);
-  motionDetected = digitalRead(BWG1_PIN) or digitalRead(BWG2_PIN);
+  motionDetected = digitalRead(BWG1_PIN) or digitalRead(BWG2_PIN) or digitalRead(BWG3_PIN);
   readRS232Data("Allg.");
 
   if (!tvState and !blocked and (motionDetected or alarmVal or ausgerVal)) {      // TV Einschalten
@@ -85,19 +89,24 @@ void loop() {
   
   } else if (tvState and !blocked and (motionDetected or alarmVal or ausgerVal)) {
     startTime = actTime;
-    if (digitalRead(BWG1_PIN)==1){
+  }
+  
+  /*if (digitalRead(BWG1_PIN)==1){
     Serial.println("Melder 1: Bewegung erkannt");
   }
   if (digitalRead(BWG2_PIN)==1){
     Serial.println("Melder 2: Bewegung erkannt");
+  }
+  if (digitalRead(BWG3_PIN)==1){
+    Serial.println("Melder 3: Bewegung erkannt");
   }
   if (digitalRead(ALARM_PIN)==1){
     Serial.println("Status: Alarmiert");
   }
   if (digitalRead(AUSGER_PIN)==1){
     Serial.println("Status: Ausgerueckt");
-  }
-  }
+  }*/
+  
 
   if (tvState and (actTime - startTime >= (unsigned long) TV_OVERRUN_TIME * 1000)) {   // TV Ausschalten
       TVSerial.write(message_TV1_off, sizeof(message_TV1_off));
@@ -129,9 +138,9 @@ void loop() {
   delay(CYCLE_TIME);
 }
 
-const int BUFFER_SIZE = 100;
-
 void readRS232Data(String TVChan) {
+  const int BUFFER_SIZE = 100;
+  
   delay(300);
   if(TVSerial.available()){
     byte buf[BUFFER_SIZE];
