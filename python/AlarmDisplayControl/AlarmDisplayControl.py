@@ -27,7 +27,7 @@ TV_ON_BLOCK_TIME = 3    # time to block switch tv on after switching off the tv 
 
 # logging into a file
 LOGFILE_NAME = f"infoscreen_logfile_{time.strftime('%Y')}.log"   # filename for the logfile
-LOGFILE_PATH = os.path.join("logfiles", LOGFILE_NAME)
+LOGFILE_PATH = os.path.join("python", "AlarmDisplayControl", "logfiles", LOGFILE_NAME)
 os.makedirs(os.path.dirname(LOGFILE_PATH), exist_ok=True)
 
 logging.basicConfig(
