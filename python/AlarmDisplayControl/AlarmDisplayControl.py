@@ -88,8 +88,8 @@ def main():
    try:
       logging.info("TV infoscreen programm is started!")
 
-      open_browser(INFOSCREEN_URL)
-      time.sleep(5)
+      #open_browser(INFOSCREEN_URL)
+      #time.sleep(5)
 
       while True:
          current_time = time.time()
