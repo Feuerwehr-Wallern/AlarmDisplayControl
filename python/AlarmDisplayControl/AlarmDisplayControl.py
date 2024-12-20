@@ -1,3 +1,11 @@
+'''
+Freiwillige Feuerwehr Wallern / Fraham
+Infopoint Monitorsteuerung
+Date: 12/2024
+Author: HBM d.F. Stefan Pflüglmayer
+Author: OBI Robert Kronawettleitner
+'''
+
 from gpiozero import MotionSensor, Button       # Doc: https://gpiozero.readthedocs.io/en/stable/index.html
 from gpiozero.pins.pigpio import PiGPIOFactory  # use that for some external pins on a host ... Doc: https://gpiozero.readthedocs.io/en/stable/remote_gpio.html
 import os
@@ -13,11 +21,13 @@ PIR_PIN = {    # GPIO pins for the HC-SR312 motion sensor's
 }
 EXT_PIN = {    # GPIO pins for a external alarm input
    2 : [
-      '10.0.0.60'
+      None
+      #'10.0.0.60',     # examples
+      #'localhost'
       ],
    3 : [
-      '10.0.0.60'
-   ]
+      None
+      ]
 }
 
 # timing parameters
