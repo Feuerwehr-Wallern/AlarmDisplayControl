@@ -73,12 +73,15 @@ def turn_tv_off():
 def open_browser(browser:str, url:str, wait:int):
    close_browser(browser)   # close browser if it is already open
    if os.name == "posix":
-      open_browser_cmd = ""
+      open_browser_cmd = None
       if browser.lower() == "firefox":
          open_browser_cmd = f"WAYLAND_DISPLAY=\"wayland-1\" {browser.lower()} --new-window --kiosk-monitor wayland-1 --noerrdialogs --disable-infobars --disable-translate {url}"
       elif browser.lower() == "chromium":
          open_browser_cmd = f"WAYLAND_DISPLAY=\"wayland-1\" {browser.lower()} --new-window --kiosk --noerrdialogs --disable-infobars --disable-translate {url}"
 
+      if open_browser_cmd is None:
+         return
+      
       subprocess.Popen(
             open_browser_cmd,
             shell=True,
@@ -100,7 +103,7 @@ def close_browser(browser:str):
 
 
 def main():
-   tv_state = False     # init state of tv      # ToDo: check if hdmi is on or off
+   tv_state = True     # init state of tv      # ToDo: check if hdmi is on or off
    blocked = False      # init state blocking turn on
    motion_detected = False
    ext_alarm_detected = False
@@ -118,8 +121,9 @@ def main():
    try:
       logging.info("TV infoscreen programm is started!")
 
-      open_browser(BROWSER_NAME, INFOSCREEN_URL, BROWSER_LOADING_TIME)
       logging.info(f"{BROWSER_NAME.capitalize()} is displaying {INFOSCREEN_URL} in kiosk mode.")
+      open_browser(BROWSER_NAME, INFOSCREEN_URL, BROWSER_LOADING_TIME)
+      logging.info(f"{BROWSER_NAME.capitalize()} is opened.")
 
       while True:
          current_time = time.time()
@@ -183,6 +187,8 @@ def main():
          del extInputs[pin]
 
       logging.info("GPIO's cleaned up!")
+
+      turn_tv_on()   # turn on tv bevor stopping
       logging.info("TV infoscreen programm is stopped by user!")
 
 
