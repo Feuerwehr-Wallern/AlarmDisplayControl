@@ -11,6 +11,7 @@ from gpiozero.pins.pigpio import PiGPIOFactory  # use that for some external pin
 import os
 import time
 import logging
+import subprocess
 
 # url to show at the display
 INFOSCREEN_URL = "https://connected.rosenbauer.com/alarmmonitor/"
@@ -21,12 +22,13 @@ PIR_PIN = {    # GPIO pins for the HC-SR312 motion sensor's
 }
 EXT_PIN = {    # GPIO pins for a external alarm input
    2 : [
-      None
-      #'10.0.0.60',     # examples
+      #None
+      '10.0.0.60'     # examples
       #'localhost'
       ],
    3 : [
-      None
+      #None
+      '10.0.0.60'
       ]
 }
 
@@ -37,8 +39,9 @@ TV_ON_BLOCK_TIME = 3    # time to block switch tv on after switching off the tv 
 
 # logging into a file
 LOGFILE_NAME = f"infoscreen_logfile_{time.strftime('%Y')}.log"   # filename for the logfile
-LOGFILE_PATH = os.path.join("python", "AlarmDisplayControl", "logfiles", LOGFILE_NAME)
-os.makedirs(os.path.dirname(LOGFILE_PATH), exist_ok=True)
+LOGFILE_PATH = os.path.join(os.path.dirname(__file__), "logfiles", LOGFILE_NAME)    # full file path
+
+os.makedirs(os.path.dirname(LOGFILE_PATH), exist_ok=True)   # create a logfile folder if it doesn't exist
 
 logging.basicConfig(
    format="%(asctime)s [%(levelname)s] %(message)s",
@@ -70,7 +73,12 @@ def turn_tv_off():
 def open_browser(url:str):
    logging.info(f"Firefox is displaying {url} in kiosk mode.")
    if os.name == "posix":
-      os.system(f"WAYLAND_DISPLAY=\"wayland-1\" firefox --new-window --kiosk --ozone-platform=wayland --start-maximized --noerrdialogs --disable-infobars --disable-translate {url}")
+      subprocess.Popen(
+         f"WAYLAND_DISPLAY=\"wayland-1\" firefox --new-window --kiosk-monitor wayland-1 --noerrdialogs --disable-infobars --disable-translate {url}",
+         shell=True,
+         stdout=subprocess.DEVNULL,
+         stderr=subprocess.DEVNULL
+         )
 
 # Function to close Firefox
 def close_browser():
@@ -80,7 +88,7 @@ def close_browser():
 
 
 def main():
-   tv_state = False     # init state of tv
+   tv_state = False     # init state of tv      # ToDo: check if hdmi is on or off
    blocked = False      # init state blocking turn on
    motion_detected = False
    ext_alarm_detected = False
