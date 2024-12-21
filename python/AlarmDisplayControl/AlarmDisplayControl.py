@@ -60,27 +60,27 @@ def turn_tv_on():
    if os.name == "posix":
       os.system(f"WAYLAND_DISPLAY=\"wayland-1\" wlr-randr --output HDMI-A-1 --on")
    elif os.name == "nt":
-      pass
+      pass  # todo
 
 # Function to turn HDMI output off
 def turn_tv_off():
    if os.name == "posix":
       os.system("WAYLAND_DISPLAY=\"wayland-1\" wlr-randr --output HDMI-A-1 --off")
    elif os.name == "nt":
-      pass
+      pass  # todo
    
 # Function to open Firefox
-def open_browser(browser:str, url:str, wait:int):
+def open_browser(browser:str, url:str, wait:int) -> bool:
    close_browser(browser)   # close browser if it is already open
    if os.name == "posix":
       open_browser_cmd = None
       if browser.lower() == "firefox":
-         open_browser_cmd = f"WAYLAND_DISPLAY=\"wayland-1\" {browser.lower()} --new-window --kiosk-monitor wayland-1 --noerrdialogs --disable-infobars --disable-translate {url}"
+         open_browser_cmd = f"WAYLAND_DISPLAY=\"wayland-1\" {browser.lower()} --new-window --kiosk-monitor wayland-1 --noerrdialogs --disable-infobars --disable-translate --no-first-run {url}"
       elif browser.lower() == "chromium":
-         open_browser_cmd = f"WAYLAND_DISPLAY=\"wayland-1\" {browser.lower()} --new-window --kiosk --noerrdialogs --disable-infobars --disable-translate {url}"
+         open_browser_cmd = f"WAYLAND_DISPLAY=\"wayland-1\" {browser.lower()} --new-window --kiosk --noerrdialogs --disable-infobars --disable-translate --no-first-run {url}"
 
       if open_browser_cmd is None:
-         return
+         return False
       
       subprocess.Popen(
             open_browser_cmd,
@@ -90,9 +90,11 @@ def open_browser(browser:str, url:str, wait:int):
             )
 
       time.sleep(wait)
+      return True
          
    elif os.name == "nt":
       pass  # todo
+   return False
 
 # Function to close Firefox
 def close_browser(browser:str):
@@ -123,8 +125,11 @@ def main():
       logging.info("TV infoscreen programm is started!")
 
       logging.info(f"{BROWSER_NAME.capitalize()} is displaying {INFOSCREEN_URL} in kiosk mode.")
-      open_browser(BROWSER_NAME, INFOSCREEN_URL, BROWSER_LOADING_TIME)
-      logging.info(f"{BROWSER_NAME.capitalize()} is opened.")
+      
+      if open_browser(BROWSER_NAME, INFOSCREEN_URL, BROWSER_LOADING_TIME):
+         logging.info(f"{BROWSER_NAME.capitalize()} is opened.")
+      else:
+         logging.info(f"{BROWSER_NAME.capitalize()} is not opened!")
 
       while True:
          current_time = time.time()
