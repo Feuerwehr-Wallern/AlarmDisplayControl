@@ -13,7 +13,8 @@ import time
 import logging
 import subprocess
 
-# url to show at the display
+# url and browser to show at the display
+BROWSER_NAME = "firefox"  # select the browser here (e.g. 'firefox, or 'chromium')
 INFOSCREEN_URL = "https://connected.rosenbauer.com/alarmmonitor/"
 INFOSCREEN_URL = "https://time.is/New_York"  # just for a test
 
@@ -33,9 +34,10 @@ EXT_PIN = {    # GPIO pins for a external alarm input
 }
 
 # timing parameters
-CYCLE_TIME = 0.2        # loop time in seconds
-TV_OVERRUN_TIME = 20    # time after tv should switch off in seconds
-TV_ON_BLOCK_TIME = 3    # time to block switch tv on after switching off the tv in seconds
+CYCLE_TIME = 0.2           # loop time in seconds
+TV_OVERRUN_TIME = 20       # time after tv should switch off in seconds
+TV_ON_BLOCK_TIME = 3       # time to block switch tv on after switching off the tv in seconds
+BROWSER_LOADING_TIME = 10  # wait to load the browser in seconds
 
 # logging into a file
 LOGFILE_NAME = f"infoscreen_logfile_{time.strftime('%Y')}.log"   # filename for the logfile
@@ -55,7 +57,6 @@ logging.basicConfig(
 
 # Function to turn HDMI output on
 def turn_tv_on():
-   logging.info("HDMI output is switched ON.")
    if os.name == "posix":
       os.system(f"WAYLAND_DISPLAY=\"wayland-1\" wlr-randr --output HDMI-A-1 --on")
    elif os.name == "nt":
@@ -63,28 +64,39 @@ def turn_tv_on():
 
 # Function to turn HDMI output off
 def turn_tv_off():
-   logging.info("HDMI output is switched OFF.")
    if os.name == "posix":
       os.system("WAYLAND_DISPLAY=\"wayland-1\" wlr-randr --output HDMI-A-1 --off")
    elif os.name == "nt":
       pass
    
 # Function to open Firefox
-def open_browser(url:str):
-   logging.info(f"Firefox is displaying {url} in kiosk mode.")
+def open_browser(browser:str, url:str, wait:int):
+   close_browser(browser)   # close browser if it is already open
    if os.name == "posix":
+      open_browser_cmd = ""
+      if browser.lower() == "firefox":
+         open_browser_cmd = f"WAYLAND_DISPLAY=\"wayland-1\" {browser.lower()} --new-window --kiosk-monitor wayland-1 --noerrdialogs --disable-infobars --disable-translate {url}"
+      elif browser.lower() == "chromium":
+         open_browser_cmd = f"WAYLAND_DISPLAY=\"wayland-1\" {browser.lower()} --new-window --kiosk --noerrdialogs --disable-infobars --disable-translate {url}"
+
       subprocess.Popen(
-         f"WAYLAND_DISPLAY=\"wayland-1\" firefox --new-window --kiosk-monitor wayland-1 --noerrdialogs --disable-infobars --disable-translate {url}",
-         shell=True,
-         stdout=subprocess.DEVNULL,
-         stderr=subprocess.DEVNULL
-         )
+            open_browser_cmd,
+            shell=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+            )
+
+      time.sleep(wait)
+         
+   elif os.name == "nt":
+      pass  # todo
 
 # Function to close Firefox
-def close_browser():
-   logging.info("Firefox browser is closing.")
+def close_browser(browser:str):
    if os.name == "posix":
-      os.system("pkill firefox")
+      os.system(f"pkill {browser.lower()}")
+   elif os.name == "nt":
+      pass  # todo
 
 
 def main():
@@ -106,8 +118,8 @@ def main():
    try:
       logging.info("TV infoscreen programm is started!")
 
-      #open_browser(INFOSCREEN_URL)
-      #time.sleep(5)
+      open_browser(INFOSCREEN_URL, BROWSER_LOADING_TIME)
+      logging.info(f"{BROWSER_NAME.capitalize()} is displaying {INFOSCREEN_URL} in kiosk mode.")
 
       while True:
          current_time = time.time()
@@ -137,6 +149,7 @@ def main():
 
          if not tv_state and not blocked and (motion_detected or ext_alarm_detected):   # switch tv on
             turn_tv_on()
+            logging.info("TV monitor is switched ON.")
             tv_state = True
             start_time = current_time
       
@@ -145,6 +158,7 @@ def main():
 
          if tv_state and (current_time - start_time >= TV_OVERRUN_TIME):  # switch tv off
             turn_tv_off()
+            logging.info("TV monitor is switched OFF.")
             tv_state = False
             blocked = True
             start_time = current_time
@@ -155,8 +169,8 @@ def main():
          time.sleep(CYCLE_TIME)
 
    except KeyboardInterrupt:
-      close_browser()
-      logging.info("TV infoscreen programm is stopped by user!")
+      close_browser(BROWSER_NAME)
+      logging.info(f"{BROWSER_NAME.capitalize()} browser is closing.")
 
    finally:
       # gpio cleanup
@@ -169,6 +183,7 @@ def main():
          del extInputs[pin]
 
       logging.info("GPIO's cleaned up!")
+      logging.info("TV infoscreen programm is stopped by user!")
 
 
 if __name__ == "__main__":
