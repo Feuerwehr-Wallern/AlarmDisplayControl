@@ -20,6 +20,15 @@ INFOSCREEN_URL = "https://time.is/New_York"  # just for a test
 
 # GPIO setup
 PIR_PIN = {    # GPIO pins for the HC-SR312 motion sensor's
+   10 : [
+      None
+      #'10.0.0.60'     # examples
+      #'localhost'
+      ],
+   11 : [
+      #None
+      '10.0.0.60'
+      ]
 }
 EXT_PIN = {    # GPIO pins for a external alarm input
    2 : [
@@ -75,9 +84,9 @@ def open_browser(browser:str, url:str, wait:int) -> bool:
    if os.name == "posix":
       open_browser_cmd = None
       if browser.lower() == "firefox":
-         open_browser_cmd = f"WAYLAND_DISPLAY=\"wayland-1\" {browser.lower()} --new-window --kiosk-monitor wayland-1 --noerrdialogs --disable-infobars --disable-translate --no-first-run {url}"
+         open_browser_cmd = f"WAYLAND_DISPLAY=\"wayland-1\" {browser.lower()} --new-window --kiosk-monitor wayland-1 --noerrdialogs --disable-infobars --disable-translate {url}"
       elif browser.lower() == "chromium":
-         open_browser_cmd = f"WAYLAND_DISPLAY=\"wayland-1\" {browser.lower()} --new-window --kiosk --noerrdialogs --disable-infobars --disable-translate --no-first-run {url}"
+         open_browser_cmd = f"WAYLAND_DISPLAY=\"wayland-1\" {browser.lower()} --new-window --kiosk --noerrdialogs --disable-infobars --disable-translate {url}"
 
       if open_browser_cmd is None:
          return False
@@ -113,13 +122,21 @@ def main():
   
    motionSensors = {}
    for pin in PIR_PIN:
+      motionSensors[pin] = {}
       for ip in PIR_PIN[pin]:
-         motionSensors[pin] = MotionSensor(pin, pin_factory=PiGPIOFactory(host=ip))
-
+         if ip is None:
+            motionSensors[pin][ip] = MotionSensor(pin)
+         else:
+            motionSensors[pin][ip] = MotionSensor(pin, pin_factory=PiGPIOFactory(host=ip))
+         
    extInputs = {}
    for pin in EXT_PIN:
+      extInputs[pin] = {}
       for ip in EXT_PIN[pin]:
-         extInputs[pin] = Button(pin, pin_factory=PiGPIOFactory(host=ip))
+         if ip is None:
+            extInputs[pin][ip] = Button(pin)
+         else:
+            extInputs[pin][ip] = Button(pin, pin_factory=PiGPIOFactory(host=ip))
 
    try:
       logging.info("TV infoscreen programm is started!")
@@ -136,25 +153,29 @@ def main():
 
          if not motion_detected:
             for pin in motionSensors:
-               if motionSensors[pin].motion_detected:
-                  motion_detected = True
-                  logging.info(f"Motion detected at GPIO {pin}, host: {motionSensors[pin].pin_factory.host}.")
+               for ip in motionSensors[pin]:
+                  if motionSensors[pin][ip].motion_detected:
+                     motion_detected = True
+                     logging.info(f"Motion detected at GPIO {pin}, host: {ip}.")
          else:
             motion_detected = False   
             for pin in motionSensors:
-               if motionSensors[pin].motion_detected:
-                  motion_detected = True
+               for ip in motionSensors[pin]:
+                  if motionSensors[pin][ip].motion_detected:
+                     motion_detected = True
 
          if not ext_alarm_detected:
             for pin in extInputs:
-               if extInputs[pin].is_pressed:
-                  ext_alarm_detected = True
-                  logging.info(f"External input signal detected at GPIO {pin}, host: {extInputs[pin].pin_factory.host}.")
+               for ip in extInputs[pin]:
+                  if extInputs[pin][ip].is_pressed:
+                     ext_alarm_detected = True
+                     logging.info(f"External input signal detected at GPIO {pin}, host: {ip}.")
          else:
             ext_alarm_detected = False
             for pin in extInputs:
-               if extInputs[pin].is_pressed:
-                  ext_alarm_detected = True
+               for ip in extInputs[pin]:
+                  if extInputs[pin][ip].is_pressed:
+                     ext_alarm_detected = True
 
 
          if not tv_state and not blocked and (motion_detected or ext_alarm_detected):   # switch tv on
@@ -185,11 +206,15 @@ def main():
    finally:
       # gpio cleanup
       for pin in PIR_PIN:
-         motionSensors[pin].close()
+         for ip in PIR_PIN[pin]:
+            motionSensors[pin][ip].close()
+            del motionSensors[pin][ip]
          del motionSensors[pin]
 
       for pin in EXT_PIN:
-         extInputs[pin].close()
+         for ip in EXT_PIN[pin]:
+            extInputs[pin][ip].close()
+            del extInputs[pin][ip]
          del extInputs[pin]
 
       logging.info("GPIO's cleaned up!")
