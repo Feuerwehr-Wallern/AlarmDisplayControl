@@ -103,8 +103,9 @@ def close_browser(browser:str):
 
 
 def main():
-   tv_state = True     # init state of tv      # ToDo: check if hdmi is on or off
-   blocked = False      # init state blocking turn on
+   tv_state = True            # init state of tv
+   start_time = time.time()   # start time in init state
+   blocked = False            # init state blocking turn on
    motion_detected = False
    ext_alarm_detected = False
   
