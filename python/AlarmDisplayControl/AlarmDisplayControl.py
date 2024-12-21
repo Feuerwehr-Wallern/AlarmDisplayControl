@@ -118,7 +118,7 @@ def main():
    try:
       logging.info("TV infoscreen programm is started!")
 
-      open_browser(INFOSCREEN_URL, BROWSER_LOADING_TIME)
+      open_browser(BROWSER_NAME, INFOSCREEN_URL, BROWSER_LOADING_TIME)
       logging.info(f"{BROWSER_NAME.capitalize()} is displaying {INFOSCREEN_URL} in kiosk mode.")
 
       while True:
