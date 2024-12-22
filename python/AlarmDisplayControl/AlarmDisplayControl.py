@@ -145,7 +145,7 @@ def main():
          ext_alarm_detected, ext_devices = ext_alarm_sensors.getState()
          for ext_dev in ext_devices:
             if not hasattr(ext_dev.pin_factory, 'host'):
-               logging.info(f"External input signal detected at {ext_dev.pin} (pull_up={ext_dev.pull_up}.")
+               logging.info(f"External input signal detected at {ext_dev.pin} (pull_up={ext_dev.pull_up}).")
             else:
                logging.info(f"External input signal detected at {ext_dev.pin} (pull_up={ext_dev.pull_up}, host={ext_dev.pin_factory.host}).")
                
