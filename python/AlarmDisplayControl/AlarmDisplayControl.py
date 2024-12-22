@@ -142,6 +142,7 @@ def main():
          ext_alarm_detected, ext_device = ext_alarm_sensors.getState()
          if ext_device:
             logging.info(f"External input signal detected at {ext_device.pin} (pull_up={ext_device.pull_up}, host={ext_device.pin_factory.host}).")
+         print(ext_alarm_detected)
 
          # timing algorithm to switch the tv
          if not tv_state and not blocked and (motion_detected or ext_alarm_detected):   # switch tv on
@@ -175,7 +176,10 @@ def main():
       del ext_alarm_sensors
       logging.info("GPIO's cleaned up!")
 
-      turn_tv_on()   # turn on tv befor stopping
+      if not tv_state:
+         turn_tv_on()   # turn on tv befor stopping
+         logging.info("TV monitor is switched ON.")
+
       logging.info("TV infoscreen programm is stopped by user!")
 
 
