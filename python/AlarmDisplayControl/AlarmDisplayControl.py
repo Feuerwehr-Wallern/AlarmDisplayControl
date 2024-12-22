@@ -6,12 +6,11 @@ Author: HBM d.F. Stefan Pflüglmayer
 Author: OBI Robert Kronawettleitner
 '''
 
-from gpiozero import MotionSensor, Button       # Doc: https://gpiozero.readthedocs.io/en/stable/index.html
-from gpiozero.pins.pigpio import PiGPIOFactory  # use that for some external pins on a host ... Doc: https://gpiozero.readthedocs.io/en/stable/remote_gpio.html
 import os
 import time
 import logging
 import subprocess
+from GPIOHandler import MotionSensor_Handler, Button_Handler
 
 # url and browser to show at the display
 BROWSER_NAME = "firefox"  # select the browser here (e.g. 'firefox, or 'chromium')
@@ -21,8 +20,8 @@ INFOSCREEN_URL = "https://time.is/New_York"  # just for a test
 # GPIO setup
 PIR_PIN = {    # GPIO pins for the HC-SR312 motion sensor's
    10 : [
-      None
-      #'10.0.0.60'     # examples
+      #None
+      '10.0.0.60'     # examples
       #'localhost'
       ],
    11 : [
@@ -62,7 +61,6 @@ logging.basicConfig(
       logging.StreamHandler()
    ]
 )
-
 
 # Function to turn HDMI output on
 def turn_tv_on():
@@ -115,69 +113,37 @@ def close_browser(browser:str):
 
 def main():
    tv_state = True            # init state of tv
-   start_time = time.time()   # start time in init state
    blocked = False            # init state blocking turn on
+   start_time = time.time()   # start time in init state
+   
    motion_detected = False
+   motion_sensors = MotionSensor_Handler(PIR_PIN)
+
    ext_alarm_detected = False
-  
-   motionSensors = {}
-   for pin in PIR_PIN:
-      motionSensors[pin] = {}
-      for ip in PIR_PIN[pin]:
-         if ip is None:
-            motionSensors[pin][ip] = MotionSensor(pin)
-         else:
-            motionSensors[pin][ip] = MotionSensor(pin, pin_factory=PiGPIOFactory(host=ip))
-         
-   extInputs = {}
-   for pin in EXT_PIN:
-      extInputs[pin] = {}
-      for ip in EXT_PIN[pin]:
-         if ip is None:
-            extInputs[pin][ip] = Button(pin)
-         else:
-            extInputs[pin][ip] = Button(pin, pin_factory=PiGPIOFactory(host=ip))
+   ext_alarm_sensors = Button_Handler(EXT_PIN)
 
    try:
       logging.info("TV infoscreen programm is started!")
-
       logging.info(f"{BROWSER_NAME.capitalize()} is displaying {INFOSCREEN_URL} in kiosk mode.")
       
       if open_browser(BROWSER_NAME, INFOSCREEN_URL, BROWSER_LOADING_TIME):
          logging.info(f"{BROWSER_NAME.capitalize()} is opened.")
       else:
-         logging.info(f"{BROWSER_NAME.capitalize()} is not opened!")
+         logging.warning(f"{BROWSER_NAME.capitalize()} is not opened!")
 
       while True:
          current_time = time.time()
 
-         if not motion_detected:
-            for pin in motionSensors:
-               for ip in motionSensors[pin]:
-                  if motionSensors[pin][ip].motion_detected:
-                     motion_detected = True
-                     logging.info(f"Motion detected at GPIO {pin}, host: {ip}.")
-         else:
-            motion_detected = False   
-            for pin in motionSensors:
-               for ip in motionSensors[pin]:
-                  if motionSensors[pin][ip].motion_detected:
-                     motion_detected = True
+         # update motions or external inputs
+         motion_detected, motion_device = motion_sensors.getState()
+         if motion_device:
+            logging.info(f"Motion detected at {motion_device.pin} (pull_up={motion_device.pull_up}, host={motion_device.pin_factory.host}).")
 
-         if not ext_alarm_detected:
-            for pin in extInputs:
-               for ip in extInputs[pin]:
-                  if extInputs[pin][ip].is_pressed:
-                     ext_alarm_detected = True
-                     logging.info(f"External input signal detected at GPIO {pin}, host: {ip}.")
-         else:
-            ext_alarm_detected = False
-            for pin in extInputs:
-               for ip in extInputs[pin]:
-                  if extInputs[pin][ip].is_pressed:
-                     ext_alarm_detected = True
+         ext_alarm_detected, ext_device = ext_alarm_sensors.getState()
+         if ext_device:
+            logging.info(f"External input signal detected at {ext_device.pin} (pull_up={ext_device.pull_up}, host={ext_device.pin_factory.host}).")
 
-
+         # timing algorithm to switch the tv
          if not tv_state and not blocked and (motion_detected or ext_alarm_detected):   # switch tv on
             turn_tv_on()
             logging.info("TV monitor is switched ON.")
@@ -205,21 +171,11 @@ def main():
 
    finally:
       # gpio cleanup
-      for pin in PIR_PIN:
-         for ip in PIR_PIN[pin]:
-            motionSensors[pin][ip].close()
-            del motionSensors[pin][ip]
-         del motionSensors[pin]
-
-      for pin in EXT_PIN:
-         for ip in EXT_PIN[pin]:
-            extInputs[pin][ip].close()
-            del extInputs[pin][ip]
-         del extInputs[pin]
-
+      del motion_sensors
+      del ext_alarm_sensors
       logging.info("GPIO's cleaned up!")
 
-      turn_tv_on()   # turn on tv bevor stopping
+      turn_tv_on()   # turn on tv befor stopping
       logging.info("TV infoscreen programm is stopped by user!")
 
 
