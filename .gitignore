@@ -1,4 +1,4 @@
 .vs/
 .vscode/
-**/python/AlarmDisplayControl/logfiles
-**/python/AlarmDisplayControl/__pycache__
+**/logfiles
+**/__pycache__
