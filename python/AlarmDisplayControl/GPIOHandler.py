@@ -9,33 +9,33 @@ from gpiozero.pins.pigpio import PiGPIOFactory  # use that for some external pin
 
 class GPIO_Handler():
     def __init__(self):
-        self.devices = {}   # store the device here
-        self.state = {}     # store the states off all GPIO Devices
+        self.devices = {}               # store the device and the each state here
         self.loggedDeviceAction = []    # store the devices for logging
 
     def __del__(self):
         self.close()
         del self.devices
 
-    def setState(self, caller:Button):
-        self.state[caller] = True
-        self.loggedDeviceAction.append(caller)
+    def setState(self, callerDevice:Button):
+        self.devices[callerDevice] = True
+        self.loggedDeviceAction.append(callerDevice)
 
-    def resetState(self, caller:Button):
-        self.state[caller] = False
+    def resetState(self, callerDevice:Button):
+        self.devices[callerDevice] = False
    
     # returns the state true if any sensor is true and the last devices which are set
-    def getState(self) -> tuple[bool, Button|None]:
-        state =  any([self.state[item] for item in self.state])
-        
+    def getState(self) -> tuple[bool, Button|MotionSensor|None]:
+        state =  any([self.devices[device] for device in self.devices])
+
         if self.loggedDeviceAction:
-            return state, self.loggedDeviceAction.pop(-1)
-        return state, None
+            device = self.loggedDeviceAction
+            self.loggedDeviceAction = []
+            return state, device
+        return state, []
     
     def close(self):
-        for pin in self.pins:
-            for ip in self.pins[pin]:
-                self.devices[pin][ip].close()
+        for device in self.devices:
+            device.close()
 
 
 class Button_Handler(GPIO_Handler):
@@ -44,17 +44,17 @@ class Button_Handler(GPIO_Handler):
         self.pins = pins
                 
         for pin in self.pins:
-            self.devices[pin] = {}
             for ip in self.pins[pin]:
                 if ip is None:
-                    self.devices[pin][ip] = Button(pin, bounce_time=0.3)
+                    device = Button(pin, bounce_time=0.3)
                 else:
-                    self.devices[pin][ip] = Button(pin, bounce_time=0.3, pin_factory=PiGPIOFactory(host=ip))
-                
-                self.devices[pin][ip].when_pressed = self.setState
-                self.devices[pin][ip].when_released = self.resetState
+                    device = Button(pin, bounce_time=0.3, pin_factory=PiGPIOFactory(host=ip))
+                self.devices[device] = False
 
-                self.state[self.devices[pin][ip]] = self.devices[pin][ip].is_pressed # set init state here
+        for device in self.devices:
+                device.when_pressed = self.setState      # func called when button pressed
+                device.when_released = self.resetState   # func called when button released
+                self.devices[device] = device.is_pressed # set init state here
 
 
 class MotionSensor_Handler(GPIO_Handler):
@@ -63,14 +63,14 @@ class MotionSensor_Handler(GPIO_Handler):
         self.pins = pins
                 
         for pin in self.pins:
-            self.devices[pin] = {}
             for ip in self.pins[pin]:
                 if ip is None:
-                    self.devices[pin][ip] = MotionSensor(pin)
+                    device = MotionSensor(pin)
                 else:
-                    self.devices[pin][ip] = MotionSensor(pin, pin_factory=PiGPIOFactory(host=ip))
-                
-                self.devices[pin][ip].when_motion = self.setState
-                self.devices[pin][ip].when_no_motion = self.resetState
-
-                self.state[self.devices[pin][ip]] = self.devices[pin][ip].motion_detected # set init state here
+                    device = MotionSensor(pin, pin_factory=PiGPIOFactory(host=ip))
+                self.devices[device] = False
+    
+        for device in self.devices:
+            device.when_motion = self.setState              # func called when motion detected
+            device.when_no_motion = self.resetState         # func called when no motion detected
+            self.devices[device] = device.motion_detected   # set init state here
