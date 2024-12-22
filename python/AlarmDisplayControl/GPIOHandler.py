@@ -54,6 +54,8 @@ class Button_Handler(GPIO_Handler):
                 self.devices[pin][ip].when_pressed = self.setState
                 self.devices[pin][ip].when_released = self.resetState
 
+                self.state[self.devices[pin][ip]] = self.devices[pin][ip].is_pressed # set init state here
+
 
 class MotionSensor_Handler(GPIO_Handler):
     def __init__(self, pins:dict):
@@ -70,3 +72,5 @@ class MotionSensor_Handler(GPIO_Handler):
                 
                 self.devices[pin][ip].when_motion = self.setState
                 self.devices[pin][ip].when_no_motion = self.resetState
+
+                self.state[self.devices[pin][ip]] = self.devices[pin][ip].motion_detected # set init state here
