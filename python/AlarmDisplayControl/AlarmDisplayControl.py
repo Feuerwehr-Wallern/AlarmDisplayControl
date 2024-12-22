@@ -17,35 +17,37 @@ BROWSER_NAME = "firefox"  # select the browser here (e.g. 'firefox, or 'chromium
 INFOSCREEN_URL = "https://connected.rosenbauer.com/alarmmonitor/"
 INFOSCREEN_URL = "https://time.is/New_York"  # just for a test
 
-# GPIO setup
-PIR_PIN = {    # GPIO pins for the HC-SR312 motion sensor's
-   10 : [
-      #None
-      '10.0.0.60'     # examples
-      #'localhost'
-      ],
-   11 : [
-      #None
-      '10.0.0.60'
-      ]
-}
-EXT_PIN = {    # GPIO pins for a external alarm input
-   2 : [
-      #None
-      '10.0.0.60'     # examples
-      #'localhost'
-      ],
-   3 : [
-      #None
-      '10.0.0.60'
-      ]
-}
-
 # timing parameters
 CYCLE_TIME = 0.2           # loop time in seconds
 TV_OVERRUN_TIME = 20       # time after tv should switch off in seconds
 TV_ON_BLOCK_TIME = 3       # time to block switch tv on after switching off the tv in seconds
 BROWSER_LOADING_TIME = 10  # wait to load the browser in seconds
+
+# GPIO setup
+PIR_PIN = {    # GPIO pins for the HC-SR312 motion sensor's
+   10 : [
+      #None          # 'None' use the local GPIO without pigpio
+      #'localhost'   # 'localhost' use the local GPIO with pigpio
+      '10.0.0.60'    # 'xx.xx.xx.xx' use the remot GPIO with pigpio
+      ],
+   11 : [
+      #None
+      #'localhost'
+      '10.0.0.60'
+      ]
+}
+EXT_PIN = {    # GPIO pins for a external alarm input
+   2 : [
+      #None          # 'None' use the local GPIO without pigpio
+      #'localhost'   # 'localhost' use the local GPIO with pigpio
+      '10.0.0.60'    # 'xx.xx.xx.xx' use the remot GPIO with pigpio
+      ],
+   3 : [
+      #None
+      #'localhost'
+      '10.0.0.60'
+      ]
+}
 
 # logging into a file
 LOGFILE_NAME = f"infoscreen_logfile_{time.strftime('%Y')}.log"   # filename for the logfile
