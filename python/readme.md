@@ -11,7 +11,7 @@ If you need this, follow the instructions: https://gpiozero.readthedocs.io/en/la
 ## Autostart (Raspberry PI)
 ..
 
-## Hide Coursor (Raspberry PI)
+## Hide Cursor (Raspberry PI)
 ..
 
 
