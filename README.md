@@ -8,10 +8,11 @@ An project to control the alarmdisplay by a motion sensor or a external input li
 * `/.python` - python implementation of the AlarmDisplayControl project.
 
 ## Repository Download using git
-1. Download git software for your system https://git-scm.com/downloads
-This is normaly preinstalled at raspberry pi os!
+1.  Download git software for your system https://git-scm.com/downloads
+    [!NOTE]
+    This is normaly preinstalled at raspberry pi os!
 
-2. Clone the repository into your directory:
+2.  Clone the repository into your directory:
     ```env
     git clone  https://github.com/Feuerwehr-Wallern/AlarmDisplayControl
     ```
