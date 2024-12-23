@@ -2,11 +2,12 @@
 
 
 ## Used GPIO Libary
-Doc: https://gpiozero.readthedocs.io/en/latest/#
+Doc:  https://gpiozero.readthedocs.io/
 
 ## Remote GPIO
 ..
 
+## Autostart (Raspberry PI)
 
 ## Hide Coursor (Raspberry PI)
 ..
