@@ -11,7 +11,7 @@ pinout
 ```
 This tool is provided by the GPIO Zero Python library, which is installed by default in Raspberry Pi OS.
 
-or visit the website: https://pinout.xyz/
+Or visit the website: https://pinout.xyz/
 
 
 ## Remote GPIO
