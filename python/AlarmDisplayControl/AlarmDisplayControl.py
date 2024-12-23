@@ -118,11 +118,8 @@ def main():
    blocked = False            # init state blocking turn on
    start_time = time.time()   # start time in init state
    
-   motion_detected = False
-   motion_sensors = MotionSensor_Handler(PIR_PIN)
-
-   ext_alarm_detected = False
-   ext_alarm_sensors = Button_Handler(EXT_PIN)
+   motion_sensors = MotionSensor_Handler(PIR_PIN)  # instance for motion sensors
+   ext_alarm_sensors = Button_Handler(EXT_PIN)     # instance for external inputs
 
    try:
       logging.info("TV infoscreen programm is started!")
@@ -137,20 +134,9 @@ def main():
          current_time = time.time()
 
          # update motions or external inputs
-         motion_detected, motion_devices = motion_sensors.getState()
-         for motion_dev in motion_devices:
-            if not hasattr(ext_dev.pin_factory, 'host'):
-               logging.info(f"Motion detected at {motion_dev.pin} (pull_up={motion_dev.pull_up}).")
-            else:
-               logging.info(f"Motion detected at {motion_dev.pin} (pull_up={motion_dev.pull_up}, host={motion_dev.pin_factory.host}).")
+         motion_detected = motion_sensors.getState()
+         ext_alarm_detected = ext_alarm_sensors.getState()
 
-         ext_alarm_detected, ext_devices = ext_alarm_sensors.getState()
-         for ext_dev in ext_devices:
-            if not hasattr(ext_dev.pin_factory, 'host'):
-               logging.info(f"External input signal detected at {ext_dev.pin} (pull_up={ext_dev.pull_up}).")
-            else:
-               logging.info(f"External input signal detected at {ext_dev.pin} (pull_up={ext_dev.pull_up}, host={ext_dev.pin_factory.host}).")
-               
          # timing algorithm to switch the tv
          if not tv_state and not blocked and (motion_detected or ext_alarm_detected):   # switch tv on
             turn_tv_on()
