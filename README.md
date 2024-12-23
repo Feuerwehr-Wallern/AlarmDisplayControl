@@ -14,6 +14,6 @@ An project to control the alarmdisplay by a motion sensor or a external input li
 
 2.  Clone the repository into your directory:
     ```env
-    git clone  https://github.com/Feuerwehr-Wallern/AlarmDisplayControl
+    git clone https://github.com/Feuerwehr-Wallern/AlarmDisplayControl
     ```
  
