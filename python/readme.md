@@ -43,7 +43,7 @@ If you need this, follow the instructions: https://gpiozero.readthedocs.io/en/la
     ```
     Save with `Ctrl`+`x`.
 
-### Method 2: using systemd
+### Method 2: using systemctl
 1.  Create a new .service file:
     ```env
     sudo nano /etc/systemd/system/infoscreen.service
@@ -66,6 +66,15 @@ If you need this, follow the instructions: https://gpiozero.readthedocs.io/en/la
     WantedBy=graphical.target
     ```
     Save with `Ctrl`+`x`.
+
+3.  Check status, start, stop, ...
+    ```env
+    sudo systemctl status infoscreen
+    ```
+
+Useful links for systemctl:
+https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units#editing-unit-files
+https://www.digitalocean.com/community/tutorials/understanding-systemd-units-and-unit-files
 
 ## Hide Cursor (Raspberry PI)
 ..
