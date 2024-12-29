@@ -83,43 +83,40 @@ def open_browser(browser:str, url:str, wait:int) -> bool:
    close_browser(browser)   # close browser if it is already open
    if os.name == "posix":
 
-      # old !!!!!!!!!!!!!!
-      #if browser.lower() == "firefox":
-      #   open_browser_cmd = f"WAYLAND_DISPLAY=\"wayland-1\" {browser.lower()} --new-window --kiosk-monitor wayland-1 --noerrdialogs --disable-infobars --disable-translate {url}"
-      #elif browser.lower() == "chromium":
-      #   open_browser_cmd = f"WAYLAND_DISPLAY=\"wayland-1\" {browser.lower()} --new-window --kiosk --noerrdialogs --disable-infobars --disable-translate {url}"
-
       way_disp = "wayland-1" # default
       if os.environ.get('XDG_SESSION_TYPE') == 'wayland':
          if os.environ.get('WAYLAND_DISPLAY') != way_disp:
             way_disp = os.environ.get('WAYLAND_DISPLAY')
 
-         open_browser_cmd = f"WAYLAND_DISPLAY=\"{way_disp}\" "
+         cmd = f"WAYLAND_DISPLAY=\"{way_disp}\" "
 
       elif os.environ.get('XDG_SESSION_TYPE') == 'x11':
          pass # todo
 
       else:
-         open_browser_cmd = f"WAYLAND_DISPLAY=\"{way_disp}\" "
+         cmd = f"WAYLAND_DISPLAY=\"{way_disp}\" "
 
 
       if browser.lower() == "firefox":
-         open_browser_cmd += f"{browser.lower()} --kiosk-monitor {way_disp}"
+         cmd += f"{browser.lower()} --kiosk-monitor {way_disp}"
       elif browser.lower() == "chromium":
-         open_browser_cmd += f"{browser.lower()} --kiosk"
+         cmd += f"{browser.lower()} --kiosk"
       else:
          return False   # no or wrong browser selected
 
-      open_browser_cmd += " --new-window"
-      open_browser_cmd += " --noerrdialogs"
-      open_browser_cmd += " --disable-infobars"
-      open_browser_cmd += " --disable-translate"
+      cmd += " --new-window"
+      cmd += " --noerrdialogs"
+      cmd += " --disable-infobars"
+      cmd += " --disable-translate"
    
-      open_browser_cmd += f" {url}"
+      cmd += f" {url}"
       
-      logging.info(f"{browser.capitalize()} is displaying {url} in kiosk mode, using \"{open_browser_cmd}\"")
+      time.sleep(3)  # todo wait for available display
+
+      logging.info(f"{browser.capitalize()} is displaying {url} in kiosk mode.")
+      logging.info(f"{cmd}")
       subprocess.Popen(
-            open_browser_cmd,
+            cmd,
             shell=True,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL
