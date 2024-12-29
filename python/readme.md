@@ -11,13 +11,13 @@ Button: https://gpiozero.readthedocs.io/en/latest/api_input.html#gpiozero.Button
 Informations about the Raspberry PI pinout and the pin numbering can be founde here:<br/>
 https://gpiozero.readthedocs.io/en/latest/recipes.html#pin-numbering
 
-A GPIO reference can be accessed on your Raspberry Pi by opening a terminal window and running the command
+or use the GPIO reference on your Raspberry Pi by opening a terminal window and running the command
 ```env
 pinout
 ```
 This tool is provided by the GPIO Zero Python library, which is installed by default in Raspberry Pi OS.
 
-Other useful links:<br/>
+or use other sites:<br/>
 https://pinout.xyz/
 
 
