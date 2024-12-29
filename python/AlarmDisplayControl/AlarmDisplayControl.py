@@ -25,27 +25,27 @@ BROWSER_LOADING_TIME = 10  # wait to load the browser in seconds
 
 # GPIO setup
 PIR_PIN = {    # GPIO pins for the HC-SR312 motion sensor's
-   10 : [
-      #None          # 'None' use the local GPIO without pigpio
+   4 : [
+      None          # 'None' use the local GPIO without pigpio
       #'localhost'   # 'localhost' use the local GPIO with pigpio
-      '10.0.0.60'    # 'xx.xx.xx.xx' use the remot GPIO with pigpio
+      #'10.0.0.60'    # 'xx.xx.xx.xx' use the remot GPIO with pigpio
       ],
-   11 : [
-      #None
+   17 : [
+      None
       #'localhost'
-      '10.0.0.60'
+      #'10.0.0.60'
       ]
 }
 EXT_PIN = {    # GPIO pins for a external alarm input
    2 : [
-      #None          # 'None' use the local GPIO without pigpio
+      None          # 'None' use the local GPIO without pigpio
       #'localhost'   # 'localhost' use the local GPIO with pigpio
-      '10.0.0.60'    # 'xx.xx.xx.xx' use the remot GPIO with pigpio
+      #'10.0.0.60'    # 'xx.xx.xx.xx' use the remot GPIO with pigpio
       ],
    3 : [
-      #None
+      None
       #'localhost'
-      '10.0.0.60'
+      #'10.0.0.60'
       ]
 }
 
@@ -82,15 +82,43 @@ def turn_tv_off():
 def open_browser(browser:str, url:str, wait:int) -> bool:
    close_browser(browser)   # close browser if it is already open
    if os.name == "posix":
-      open_browser_cmd = None
-      if browser.lower() == "firefox":
-         open_browser_cmd = f"WAYLAND_DISPLAY=\"wayland-1\" {browser.lower()} --new-window --kiosk-monitor wayland-1 --noerrdialogs --disable-infobars --disable-translate {url}"
-      elif browser.lower() == "chromium":
-         open_browser_cmd = f"WAYLAND_DISPLAY=\"wayland-1\" {browser.lower()} --new-window --kiosk --noerrdialogs --disable-infobars --disable-translate {url}"
 
-      if open_browser_cmd is None:
-         return False
+      # old !!!!!!!!!!!!!!
+      #if browser.lower() == "firefox":
+      #   open_browser_cmd = f"WAYLAND_DISPLAY=\"wayland-1\" {browser.lower()} --new-window --kiosk-monitor wayland-1 --noerrdialogs --disable-infobars --disable-translate {url}"
+      #elif browser.lower() == "chromium":
+      #   open_browser_cmd = f"WAYLAND_DISPLAY=\"wayland-1\" {browser.lower()} --new-window --kiosk --noerrdialogs --disable-infobars --disable-translate {url}"
+
+      way_disp = "wayland-1" # default
+      if os.environ.get('XDG_SESSION_TYPE') == 'wayland':
+         if os.environ.get('WAYLAND_DISPLAY') != way_disp:
+            way_disp = os.environ.get('WAYLAND_DISPLAY')
+
+         open_browser_cmd = f"WAYLAND_DISPLAY=\"{way_disp}\" "
+
+      elif os.environ.get('XDG_SESSION_TYPE') == 'x11':
+         pass # todo
+
+      else:
+         open_browser_cmd = f"WAYLAND_DISPLAY=\"{way_disp}\" "
+
+
+      if browser.lower() == "firefox":
+         open_browser_cmd.join(f"{browser.lower()} --kiosk-monitor {way_disp}")
+      elif browser.lower() == "chromium":
+         open_browser_cmd.join(f"{browser.lower()} --kiosk")
+      else:
+         return False   # no or wrong browser selected
+
+      open_browser_cmd.join([
+         " --new-window",
+         " --noerrdialogs",
+         " --disable-infobars",
+         " --disable-translate"
+      ])
+      open_browser_cmd.join(f" {url}")
       
+      logging.info(f"{browser.capitalize()} is displaying {url} in kiosk mode,\n using \"{open_browser_cmd}\"")
       subprocess.Popen(
             open_browser_cmd,
             shell=True,
@@ -123,8 +151,8 @@ def main():
 
    try:
       logging.info("TV infoscreen programm is started!")
-      logging.info(f"{BROWSER_NAME.capitalize()} is displaying {INFOSCREEN_URL} in kiosk mode.")
       
+      # try to open browser in kiosk mode
       if open_browser(BROWSER_NAME, INFOSCREEN_URL, BROWSER_LOADING_TIME):
          logging.info(f"{BROWSER_NAME.capitalize()} is opened.")
       else:
