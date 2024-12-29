@@ -23,13 +23,13 @@ You can use remote GPIO's from other devices in the network.
 If you need this, follow the instructions: https://gpiozero.readthedocs.io/en/latest/remote_gpio.html
 
 ## Autostart (Raspberry PI)
-### Using autostart
+### Method 1: using autostart folder
 1.  Create a autostart folder if it doesen't exists:
     ```env
     sudo mkdir /home/pi/.config/autostart
     ```
 
-2.  Create a .desktop file:
+2.  Create a new .desktop file:
     ```env
     sudo nano /home/pi/.config/autostart/infoscreen.desktop
     ```
@@ -41,9 +41,30 @@ If you need this, follow the instructions: https://gpiozero.readthedocs.io/en/la
     Name=AlarmDisplayControl-Autostart
     Exec=/usr/bin/python /home/pi/Desktop/AlarmDisplayControl/python/AlarmDisplayControl/AlarmDisplayControl.py
     ```
-    Save with ctrl+x
+    Save with `Ctrl`+`x`.
 
-### Using systemd
+### Method 2: using systemd
+1.  Create a new .service file:
+    ```env
+    sudo nano 
+    ```
+
+2.  Copy the following code into the infoscreen.service file:
+    ```env
+    [Unit]
+    Description=AlarmDisplayControl
+    After=graphical.target
+
+    [Service]
+    Type=idle
+    User=pi
+    Environment="XDG_RUNTIME_DIR=/run/user/1000"
+    WorkingDirectory=/home/pi/Desktop/AlarmDisplayControl/python/AlarmDisplayControl
+    ExecStart=/usr/bin/python AlarmDisplayControl.py
+
+    [Install]
+    WantedBy=graphical.target
+    ```
 
 ## Hide Cursor (Raspberry PI)
 ..
