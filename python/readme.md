@@ -4,19 +4,22 @@
 ## Used GPIO Libary
 Doc:  https://gpiozero.readthedocs.io/
 
-MotionSensor: https://gpiozero.readthedocs.io/en/latest/api_input.html#gpiozero.MotionSensor
+MotionSensor: https://gpiozero.readthedocs.io/en/latest/api_input.html#gpiozero.MotionSensor<br/>
 Button: https://gpiozero.readthedocs.io/en/latest/api_input.html#gpiozero.Button
 
-### Raspberry Pi Pinout
+### Raspberry PI pinout
+Informations about the Raspberry PI pinout and the pin numbering can be founde here:<br/>
+https://gpiozero.readthedocs.io/en/latest/recipes.html#pin-numbering
+
 A GPIO reference can be accessed on your Raspberry Pi by opening a terminal window and running the command
 ```env
 pinout
 ```
 This tool is provided by the GPIO Zero Python library, which is installed by default in Raspberry Pi OS.
 
-Other Methods:
+Other useful links:<br/>
 https://pinout.xyz/
-https://gpiozero.readthedocs.io/en/latest/api_input.html#gpiozero.Button
+
 
 ## Remote GPIO
 You can use remote GPIO's from other devices in the network.
@@ -72,8 +75,8 @@ If you need this, follow the instructions: https://gpiozero.readthedocs.io/en/la
     sudo systemctl status infoscreen
     ```
 
-Useful links for systemctl:
-https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units#editing-unit-files
+Useful links for systemctl:<br/>
+https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units#editing-unit-files<br/>
 https://www.digitalocean.com/community/tutorials/understanding-systemd-units-and-unit-files
 
 ## Hide Cursor (Raspberry PI)
