@@ -46,7 +46,7 @@ If you need this, follow the instructions: https://gpiozero.readthedocs.io/en/la
 ### Method 2: using systemd
 1.  Create a new .service file:
     ```env
-    sudo nano 
+    sudo nano /etc/systemd/system/infoscreen.service
     ```
 
 2.  Copy the following code into the infoscreen.service file:
@@ -65,6 +65,7 @@ If you need this, follow the instructions: https://gpiozero.readthedocs.io/en/la
     [Install]
     WantedBy=graphical.target
     ```
+    Save with `Ctrl`+`x`.
 
 ## Hide Cursor (Raspberry PI)
 ..
