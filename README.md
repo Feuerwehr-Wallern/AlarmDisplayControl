@@ -1,11 +1,11 @@
 # AlarmDisplayControl
-An project to control the alarmdisplay by a motion sensor or a external input like the alarmstate of the firebrigade.
-
+A project to control the alarm display using a motion sensor or an external input, such as the alarm state of the fire brigade.
 
 ## Repository Structure
 ### Make sure to read the README of each subdirectory for further information!
-* `/.arduino` - arduino implementation of the AlarmDisplayControl project.
-* `/.python` - python implementation of the AlarmDisplayControl project.
+* `/.arduino` - Arduino implementation of the AlarmDisplayControl project.
+* `/.python` - Python implementation of the AlarmDisplayControl project.
+
 
 ## Repository Download using git
 1.  Download git software for your system https://git-scm.com/downloads
