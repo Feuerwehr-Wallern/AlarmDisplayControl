@@ -33,16 +33,30 @@ class GPIO_Handler():
 
 
 class Button_Handler(GPIO_Handler):
-    def __init__(self, pins:dict):
+    def __init__(
+            self,
+            pins:dict,
+            active_state: bool | None = None,
+            bounce_time: float | None = 0.3
+            ):
         super().__init__()
         self.pins = pins
                 
         for pin in self.pins:
             for ip in self.pins[pin]:
                 if ip is None:
-                    device = Button(pin, bounce_time=0.3)
+                    device = Button(
+                        pin,
+                        active_state=active_state,
+                        bounce_time=bounce_time
+                        )
                 else:
-                    device = Button(pin, bounce_time=0.3, pin_factory=PiGPIOFactory(host=ip))
+                    device = Button(
+                        pin,
+                        active_state=active_state,
+                        bounce_time=0.3,
+                        pin_factory=PiGPIOFactory(host=ip)
+                        )
                 self.devices[device] = False
 
         for device in self.devices:
@@ -59,16 +73,36 @@ class Button_Handler(GPIO_Handler):
 
 
 class MotionSensor_Handler(GPIO_Handler):
-    def __init__(self, pins:dict):
+    def __init__(
+            self,
+            pins:dict,
+            active_state: bool | None = None,
+            queue_len:int = 1,
+            sample_rate:int = 10,
+            threshold:float = 0.5
+            ):
         super().__init__()
         self.pins = pins
         
         for pin in self.pins:
             for ip in self.pins[pin]:
                 if ip is None:
-                    device = MotionSensor(pin)
+                    device = MotionSensor(
+                        pin,
+                        active_state=active_state,
+                        queue_len=queue_len,
+                        sample_rate=sample_rate,
+                        threshold=threshold
+                        )
                 else:
-                    device = MotionSensor(pin, pin_factory=PiGPIOFactory(host=ip))
+                    device = MotionSensor(
+                        pin,
+                        active_state=active_state,
+                        queue_len=queue_len,
+                        sample_rate=sample_rate,
+                        threshold=threshold,
+                        pin_factory=PiGPIOFactory(host=ip)
+                        )
                 self.devices[device] = False
     
         for device in self.devices:
