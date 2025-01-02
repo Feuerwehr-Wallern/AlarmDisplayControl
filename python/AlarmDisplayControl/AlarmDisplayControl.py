@@ -80,6 +80,8 @@ def turn_tv_off():
 
 # Function for searching a wayland display
 def find_wayland_display() -> str | None:
+   time.sleep(4)  # todo, wait for available display
+   
    path = f"/run/user/{os.getuid()}"
 
    if not os.path.isdir(path):   # check if path exists
@@ -131,8 +133,6 @@ def open_browser(browser:str, url:str, wait:int) -> bool:
       cmd += " --disable-translate"
    
       cmd += f" {url}"
-      
-      time.sleep(3)  # todo wait for available display
 
       logging.info(f"{browser.capitalize()} is displaying {url} in kiosk mode.")
       logging.info(f"{cmd}")
