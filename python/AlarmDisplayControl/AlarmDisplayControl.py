@@ -116,7 +116,7 @@ def open_browser(browser:str, url:str, wait:int) -> bool:
 
 
       if browser.lower() == "firefox":
-         if session_type = 'x11':
+         if session_type == 'x11':
             cmd += f"{browser.lower()} --kiosk"
          else:
             cmd += f"{browser.lower()} --kiosk-monitor {way_disp}"
