@@ -77,28 +77,49 @@ def turn_tv_off():
       os.system("WAYLAND_DISPLAY=\"wayland-1\" wlr-randr --output HDMI-A-1 --off")
    elif os.name == "nt":
       pass  # todo
+
+# Function for searching a wayland display
+def find_wayland_display() -> str | None:
+   path = f"/run/user/{os.getuid()}"
+
+   if not os.path.isdir(path):   # check if path exists
+      return None
    
+   for item in os.listdir(path): # Scan for wayland display
+      if item.startswith("wayland-") and len(item) == 9:
+         return item
+      pass
+
+   return None # if no wayland socket found, return none
+
 # Function to open Firefox
 def open_browser(browser:str, url:str, wait:int) -> bool:
    close_browser(browser)   # close browser if it is already open
    if os.name == "posix":
 
-      way_disp = "wayland-1" # default
-      if os.environ.get('XDG_SESSION_TYPE') == 'wayland':
-         if os.environ.get('WAYLAND_DISPLAY') != way_disp:
-            way_disp = os.environ.get('WAYLAND_DISPLAY')
+      # check session_type
+      session_type = os.environ.get('XDG_SESSION_TYPE')
 
+      if session_type == 'wayland':
+         way_disp = os.environ.get('WAYLAND_DISPLAY')
          cmd = f"WAYLAND_DISPLAY=\"{way_disp}\" "
 
-      elif os.environ.get('XDG_SESSION_TYPE') == 'x11':
+      elif session_type == 'x11':
          pass # todo
 
       else:
+         way_disp = find_wayland_display()
+         if not way_disp:
+            way_disp = "wayland-0"  # default
+         
          cmd = f"WAYLAND_DISPLAY=\"{way_disp}\" "
 
 
       if browser.lower() == "firefox":
-         cmd += f"{browser.lower()} --kiosk-monitor {way_disp}"
+         if session_type = 'x11':
+            cmd += f"{browser.lower()} --kiosk"
+         else:
+            cmd += f"{browser.lower()} --kiosk-monitor {way_disp}"
       elif browser.lower() == "chromium":
          cmd += f"{browser.lower()} --kiosk"
       else:
