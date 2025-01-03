@@ -175,7 +175,7 @@ def main():
       else:
          logging.warning(f"{BROWSER_NAME.capitalize()} is not opened!")
 
-      while True:
+      while PIR_PIN or EXT_PIN:   # run while if PIR or EXT pins are defined
          current_time = time.time()
 
          # update motions or external inputs
