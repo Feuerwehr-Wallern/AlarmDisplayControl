@@ -166,19 +166,24 @@ def main():
    motion_sensors = MotionSensor_Handler(PIR_PIN)  # instance for motion sensors
    ext_alarm_sensors = Button_Handler(EXT_PIN)     # instance for external inputs
 
-   try:
-      logging.info("TV infoscreen programm is started!")
-      
-      # try to open browser in kiosk mode
-      if open_browser(BROWSER_NAME, INFOSCREEN_URL, BROWSER_LOADING_TIME):
-         logging.info(f"{BROWSER_NAME.capitalize()} is opened.")
-      else:
-         logging.warning(f"{BROWSER_NAME.capitalize()} is not opened!")
+   never_switch_off = False   # if True, the tv will never switch off by the programm
+   if not PIR_PIN and not EXT_PIN:
+      never_switch_off = True
 
-      while PIR_PIN or EXT_PIN:   # run while if PIR or EXT pins are defined
+
+   logging.info("TV infoscreen programm is started!")
+      
+   # try to open browser in kiosk mode
+   if open_browser(BROWSER_NAME, INFOSCREEN_URL, BROWSER_LOADING_TIME):
+      logging.info(f"{BROWSER_NAME.capitalize()} is opened.")
+   else:
+      logging.warning(f"{BROWSER_NAME.capitalize()} is not opened!")
+
+   try:
+      while True:
          current_time = time.time()
 
-         # update motions or external inputs
+         # update motions and external inputs
          motion_detected = motion_sensors.getState()
          ext_alarm_detected = ext_alarm_sensors.getState()
 
@@ -189,7 +194,7 @@ def main():
             tv_state = True
             start_time = current_time
       
-         elif tv_state and not blocked and (motion_detected or ext_alarm_detected):     # don't switch tv off until a motion or external alarm detected! 
+         elif tv_state and not blocked and (motion_detected or ext_alarm_detected or never_switch_off):     # don't switch tv off until a motion or external alarm detected! 
             start_time = current_time
 
          if tv_state and (current_time - start_time >= TV_OVERRUN_TIME):  # switch tv off
@@ -205,10 +210,13 @@ def main():
          time.sleep(CYCLE_TIME)
 
    except KeyboardInterrupt:
-      close_browser(BROWSER_NAME)
-      logging.info(f"{BROWSER_NAME.capitalize()} browser is closing.")
+      logging.info("The programm is interrupted by the user, it will be stopped!")
 
    finally:
+      # close the browser
+      close_browser(BROWSER_NAME)
+      logging.info(f"{BROWSER_NAME.capitalize()} browser is closing.")
+   
       # gpio cleanup
       del motion_sensors
       del ext_alarm_sensors
@@ -218,7 +226,7 @@ def main():
          turn_tv_on()   # turn on tv befor stopping
          logging.info("TV monitor is switched ON.")
 
-      logging.info("TV infoscreen programm is stopped by user!")
+      logging.info("TV infoscreen programm is stopped!")
 
 
 if __name__ == "__main__":
