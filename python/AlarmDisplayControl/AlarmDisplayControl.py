@@ -23,29 +23,19 @@ TV_OVERRUN_TIME = 20       # time after tv should switch off in seconds
 TV_ON_BLOCK_TIME = 3       # time to block switch tv on after switching off the tv in seconds
 BROWSER_LOADING_TIME = 10  # wait to load the browser in seconds
 
-# GPIO setup
+# GPIO setup (if no pin is given, the TV will never switch of!)
 PIR_PIN = {    # GPIO pins for the HC-SR312 motion sensor's
    4 : [
       None          # 'None' use the local GPIO without pigpio
       #'localhost'   # 'localhost' use the local GPIO with pigpio
-      #'10.0.0.60'    # 'xx.xx.xx.xx' use the remot GPIO with pigpio
-      ],
-   17 : [
-      None
-      #'localhost'
-      #'10.0.0.60'
+      #'10.0.0.60'   # 'xx.xx.xx.xx' use the remot GPIO with pigpio
       ]
 }
 EXT_PIN = {    # GPIO pins for a external alarm input
    2 : [
       None          # 'None' use the local GPIO without pigpio
       #'localhost'   # 'localhost' use the local GPIO with pigpio
-      #'10.0.0.60'    # 'xx.xx.xx.xx' use the remot GPIO with pigpio
-      ],
-   3 : [
-      None
-      #'localhost'
-      #'10.0.0.60'
+      #'10.0.0.60'   # 'xx.xx.xx.xx' use the remot GPIO with pigpio
       ]
 }
 
@@ -166,13 +156,14 @@ def main():
    motion_sensors = MotionSensor_Handler(PIR_PIN)  # instance for motion sensors
    ext_alarm_sensors = Button_Handler(EXT_PIN)     # instance for external inputs
 
+
+   logging.info("TV infoscreen programm is started!")
+
    never_switch_off = False   # if True, the tv will never switch off by the programm
    if not PIR_PIN and not EXT_PIN:
       never_switch_off = True
+      logging.info("TV will never switch of by the program, because no sensor pins are given!")
 
-
-   logging.info("TV infoscreen programm is started!")
-      
    # try to open browser in kiosk mode
    if open_browser(BROWSER_NAME, INFOSCREEN_URL, BROWSER_LOADING_TIME):
       logging.info(f"{BROWSER_NAME.capitalize()} is opened.")
