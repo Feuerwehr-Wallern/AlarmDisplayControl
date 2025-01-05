@@ -70,8 +70,6 @@ def turn_tv_off():
 
 # Function for searching a wayland display
 def find_wayland_display() -> str | None:
-   time.sleep(4)  # todo, wait for available display
-   
    path = f"/run/user/{os.getuid()}"
 
    if not os.path.isdir(path):   # check if path exists
