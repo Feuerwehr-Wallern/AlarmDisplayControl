@@ -57,12 +57,14 @@ If you need this, follow the instructions: https://gpiozero.readthedocs.io/en/la
     [Unit]
     Description=AlarmDisplayControl
     After=graphical.target
+    #After=infocenter.service    # wait for another service
 
     [Service]
     Type=idle
     User=pi
     Environment="XDG_RUNTIME_DIR=/run/user/1000"
     WorkingDirectory=/home/pi/Desktop/AlarmDisplayControl/python/AlarmDisplayControl
+    ExecStartPre=/bin/sleep 15    # wait for x seconds
     ExecStart=/usr/bin/python AlarmDisplayControl.py
 
     [Install]
