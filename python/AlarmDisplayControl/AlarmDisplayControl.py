@@ -81,13 +81,13 @@ def open_browser(browser:str, url:str, wait:int, session_type:str, disp:str) -> 
    close_browser(browser)   # close browser if it is already open
 
    if not disp:
-      logging.info("Can't open the browser, because no display given!")
+      logging.warning("Can't open the browser, because no display given!")
       return False
 
    if os.name == "posix":
       if session_type == 'x11':
          # todo
-         logging.info("Open browser is not implemented for x11 sessions yet!")
+         logging.warning("Open browser is not implemented for x11 sessions yet!")
          return False
       else:
          cmd = f"WAYLAND_DISPLAY=\"{disp}\" "   # default wayland
@@ -138,7 +138,7 @@ def find_display(session_type:str | None) -> str | None:
    if os.name == "posix":
       if session_type == 'x11':
          # todo
-         logging.info("Can't return a display because it's not implemented for x11 sessions yet!")
+         logging.warning("Can't return a display because it's not implemented for x11 sessions yet!")
          return None
       else:
          XDG_RUNTIME_DIR = f"/run/user/{os.getuid()}"
@@ -187,7 +187,7 @@ def main():
    if disp:
       logging.info(f"Founded session: {session_type}, Founded display: {disp}")
    else:
-      logging.info("No display founded!")
+      logging.warning("No display founded!")
 
    # try to open browser in kiosk mode
    if open_browser(BROWSER_NAME, INFOSCREEN_URL, BROWSER_LOADING_TIME, session_type, disp):
