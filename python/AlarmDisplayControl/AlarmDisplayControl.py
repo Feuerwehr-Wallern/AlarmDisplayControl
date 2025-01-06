@@ -79,6 +79,11 @@ def turn_tv_off(way_disp:str):
 # Function to open Firefox
 def open_browser(browser:str, url:str, wait:int, session_type:str, disp:str) -> bool:
    close_browser(browser)   # close browser if it is already open
+
+   if not disp:
+      logging.info("Can't open the browser, because no display given!")
+      return False
+
    if os.name == "posix":
       if session_type == 'x11':
          # todo
