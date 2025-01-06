@@ -21,7 +21,7 @@ or use other sites:<br/>
 https://pinout.xyz/
 
 
-## Remote GPIO
+### Remote GPIO
 You can use remote GPIO's from other devices in the network.
 If you need this, follow the instructions: https://gpiozero.readthedocs.io/en/latest/remote_gpio.html
 
@@ -84,6 +84,6 @@ https://www.digitalocean.com/community/tutorials/understanding-systemd-units-and
 ## Hide Cursor (Raspberry PI)
 ..
 
-## Some useful links
+## Some other useful links
 XDG Base Directory Specification: https://specifications.freedesktop.org/basedir-spec/latest/
 
