@@ -47,7 +47,7 @@ os.makedirs(os.path.dirname(LOGFILE_PATH), exist_ok=True)   # create a logfile f
 
 logging.basicConfig(
    format="%(asctime)s [%(levelname)s] %(message)s",
-   level=logging.INFO,
+   level=logging.DEBUG,
    handlers=[
       logging.FileHandler(LOGFILE_PATH, 'a'),
       logging.StreamHandler()
@@ -55,65 +55,48 @@ logging.basicConfig(
 )
 
 # Function to turn HDMI output on
-def turn_tv_on():
+def turn_tv_on(way_disp:str):
    if os.name == "posix":
-      os.system(f"WAYLAND_DISPLAY=\"wayland-1\" wlr-randr --output HDMI-A-1 --on")
+      cmd = f"WAYLAND_DISPLAY=\"{way_disp}\" wlr-randr --output HDMI-A-1 --on"
+      
+      logging.info("TV monitor is switched ON.")
+      logging.debug(cmd)
+      os.system(cmd)
    elif os.name == "nt":
       pass  # todo
 
 # Function to turn HDMI output off
-def turn_tv_off():
+def turn_tv_off(way_disp:str):
    if os.name == "posix":
-      os.system("WAYLAND_DISPLAY=\"wayland-1\" wlr-randr --output HDMI-A-1 --off")
+      cmd = f"WAYLAND_DISPLAY=\"{way_disp}\" wlr-randr --output HDMI-A-1 --off"
+
+      logging.info("TV monitor is switched OFF.")
+      logging.debug(cmd)
+      os.system(cmd)
    elif os.name == "nt":
       pass  # todo
 
-# Function for searching a wayland display
-def find_wayland_display() -> str | None:
-   path = f"/run/user/{os.getuid()}"
-
-   if not os.path.isdir(path):   # check if path exists
-      return None
-   
-   for item in os.listdir(path): # Scan for wayland display
-      if item.startswith("wayland-") and len(item) == 9:
-         return item
-      pass
-
-   return None # if no wayland socket found, return none
-
 # Function to open Firefox
-def open_browser(browser:str, url:str, wait:int) -> bool:
+def open_browser(browser:str, url:str, wait:int, session_type:str, disp:str) -> bool:
    close_browser(browser)   # close browser if it is already open
    if os.name == "posix":
-
-      # check session_type
-      session_type = os.environ.get('XDG_SESSION_TYPE')
-
-      if session_type == 'wayland':
-         way_disp = os.environ.get('WAYLAND_DISPLAY')
-         cmd = f"WAYLAND_DISPLAY=\"{way_disp}\" "
-
-      elif session_type == 'x11':
-         pass # todo
-
+      if session_type == 'x11':
+         # todo
+         logging.info("Open browser is not implemented for x11 sessions yet!")
+         return False
       else:
-         way_disp = find_wayland_display()
-         if not way_disp:
-            way_disp = "wayland-0"  # default
-         
-         cmd = f"WAYLAND_DISPLAY=\"{way_disp}\" "
-
+         cmd = f"WAYLAND_DISPLAY=\"{disp}\" "   # default wayland
 
       if browser.lower() == "firefox":
          if session_type == 'x11':
             cmd += f"{browser.lower()} --kiosk"
          else:
-            cmd += f"{browser.lower()} --kiosk-monitor {way_disp}"
+            cmd += f"{browser.lower()} --kiosk-monitor {disp}"
       elif browser.lower() == "chromium":
          cmd += f"{browser.lower()} --kiosk"
       else:
-         return False   # no or wrong browser selected
+         logging.info("No or wrong browser selected!")
+         return False
 
       cmd += " --new-window"
       cmd += " --noerrdialogs"
@@ -123,7 +106,7 @@ def open_browser(browser:str, url:str, wait:int) -> bool:
       cmd += f" {url}"
 
       logging.info(f"{browser.capitalize()} is displaying {url} in kiosk mode.")
-      logging.info(f"{cmd}")
+      logging.debug(cmd)
       subprocess.Popen(
             cmd,
             shell=True,
@@ -145,6 +128,37 @@ def close_browser(browser:str):
    elif os.name == "nt":
       pass  # todo
 
+# Function for searching the display
+def find_display(session_type:str | None) -> str | None:
+   if os.name == "posix":
+      if session_type == 'x11':
+         # todo
+         logging.info("Can't return a display because it's not implemented for x11 sessions yet!")
+         return None
+      else:
+         XDG_RUNTIME_DIR = f"/run/user/{os.getuid()}"
+
+         if not os.path.isdir(XDG_RUNTIME_DIR):   # check if path exists
+            return None
+         
+         for item in os.listdir(XDG_RUNTIME_DIR): # Scan for wayland display
+            if item.startswith("wayland-") and len(item) == 9:
+               return item
+            
+   elif os.name == "nt":
+      pass    # todo  
+   return None    # if no display socket found, return None
+
+# Function for searching the session
+def find_session() -> str | None:
+   if os.name == "posix":
+      XDG_SESSION_TYPE = os.environ.get('XDG_SESSION_TYPE')
+      return XDG_SESSION_TYPE
+   
+   elif os.name == "nt":
+      pass    # todo
+   return None
+
 
 def main():
    tv_state = True            # init state of tv
@@ -162,8 +176,16 @@ def main():
       never_switch_off = True
       logging.info("TV will never switch of by the program, because no sensor pins are given!")
 
+   # find session type and display here
+   session_type = find_session()
+   disp = find_display(session_type)
+   if disp:
+      logging.info(f"Founded session: {session_type}, Founded display: {disp}")
+   else:
+      logging.info("No display founded!")
+
    # try to open browser in kiosk mode
-   if open_browser(BROWSER_NAME, INFOSCREEN_URL, BROWSER_LOADING_TIME):
+   if open_browser(BROWSER_NAME, INFOSCREEN_URL, BROWSER_LOADING_TIME, session_type, disp):
       logging.info(f"{BROWSER_NAME.capitalize()} is opened.")
    else:
       logging.warning(f"{BROWSER_NAME.capitalize()} is not opened!")
@@ -178,8 +200,7 @@ def main():
 
          # timing algorithm to switch the tv
          if not tv_state and not blocked and (motion_detected or ext_alarm_detected):   # switch tv on
-            turn_tv_on()
-            logging.info("TV monitor is switched ON.")
+            turn_tv_on(disp)
             tv_state = True
             start_time = current_time
       
@@ -187,8 +208,7 @@ def main():
             start_time = current_time
 
          if tv_state and (current_time - start_time >= TV_OVERRUN_TIME):  # switch tv off
-            turn_tv_off()
-            logging.info("TV monitor is switched OFF.")
+            turn_tv_off(disp)
             tv_state = False
             blocked = True
             start_time = current_time
@@ -212,8 +232,7 @@ def main():
       logging.info("GPIO's cleaned up!")
 
       if not tv_state:
-         turn_tv_on()   # turn on tv befor stopping
-         logging.info("TV monitor is switched ON.")
+         turn_tv_on(disp)   # turn on tv befor stopping
 
       logging.info("TV infoscreen programm is stopped!")
 
