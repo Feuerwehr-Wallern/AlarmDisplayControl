@@ -76,7 +76,7 @@ def turn_tv_off(way_disp:str):
       pass  # todo
 
 # Function to open Firefox
-def open_browser(browser:str, url:str, wait:int, session_type:str, disp:str) -> bool:
+def open_browser(browser:str, url:str, wait:float, session_type:str, disp:str) -> bool:
    close_browser(browser)   # close browser if it is already open
 
    if not disp:
@@ -189,7 +189,7 @@ def main():
       logging.warning("No display founded!")
 
    # try to open browser in kiosk mode
-   if open_browser(config['BROWSER_NAME'], config['INFOSCREEN_URL'], int(config['BROWSER_LOADING_TIME']), session_type, disp):
+   if open_browser(config['BROWSER_NAME'], config['INFOSCREEN_URL'], float(config['BROWSER_LOADING_TIME']), session_type, disp):
       logging.info(f"{config['BROWSER_NAME'].capitalize()} is opened.")
    else:
       logging.warning(f"{config['BROWSER_NAME'].capitalize()} is not opened!")
@@ -211,23 +211,24 @@ def main():
          elif tv_state and not blocked and (motion_detected or ext_alarm_detected or never_switch_off):     # don't switch tv off until a motion or external alarm detected! 
             start_time = current_time
 
-         if tv_state and (current_time - start_time >= int(config['TV_OVERRUN_TIME'])):  # switch tv off
+         if tv_state and (current_time - start_time >= float(config['TV_OVERRUN_TIME'])):  # switch tv off
             turn_tv_off(disp)
             tv_state = False
             blocked = True
             start_time = current_time
 
-         if blocked and (current_time - start_time >= int(config['TV_ON_BLOCK_TIME'])):
+         if blocked and (current_time - start_time >= float(config['TV_ON_BLOCK_TIME'])):
             blocked = False
 
-         time.sleep(int(config['CYCLE_TIME']))
+         time.sleep(float(config['CYCLE_TIME']))
 
    except KeyboardInterrupt:
       logging.info("The programm is stopped by the user!")
    except SystemExit:
       logging.info("The programm is stopped by the System!")
-   except:
+   except Exception as error:
       logging.info("The programm is stopped by an unknown Event!")
+      logging.error(error)
 
    finally:
       # close the browser
