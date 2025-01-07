@@ -189,7 +189,7 @@ def main():
       logging.warning("No display founded!")
 
    # try to open browser in kiosk mode
-   if open_browser(config['BROWSER_NAME'], config['INFOSCREEN_URL'], config['BROWSER_LOADING_TIME'], session_type, disp):
+   if open_browser(config['BROWSER_NAME'], config['INFOSCREEN_URL'], int(config['BROWSER_LOADING_TIME']), session_type, disp):
       logging.info(f"{config['BROWSER_NAME'].capitalize()} is opened.")
    else:
       logging.warning(f"{config['BROWSER_NAME'].capitalize()} is not opened!")
