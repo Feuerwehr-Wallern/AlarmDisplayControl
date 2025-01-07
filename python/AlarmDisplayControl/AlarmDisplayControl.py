@@ -7,6 +7,7 @@ Author: OBI Robert Kronawettleitner
 '''
 
 import os
+import signal
 import time
 import logging
 import subprocess
@@ -53,6 +54,11 @@ logging.basicConfig(
       logging.StreamHandler()
    ]
 )
+
+# catch termination signal here for gracefully shutdown
+def signal_handler(signum, frame):
+   exit(0)  # exit here
+signal.signal(signal.SIGTERM, signal_handler)
 
 # Function to turn HDMI output on
 def turn_tv_on(way_disp:str):
@@ -224,7 +230,11 @@ def main():
          time.sleep(CYCLE_TIME)
 
    except KeyboardInterrupt:
-      logging.info("The programm is interrupted by the user, it will be stopped!")
+      logging.info("The programm is stopped by the user!")
+   except SystemExit:
+      logging.info("The programm is stopped by the System!")
+   except:
+      logging.info("The programm is stopped by an unknown Event!")
 
    finally:
       # close the browser
