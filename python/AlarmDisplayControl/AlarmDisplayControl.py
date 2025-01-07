@@ -13,47 +13,40 @@ import logging
 import subprocess
 from GPIOHandler import MotionSensor_Handler, Button_Handler
 
-# url and browser to show at the display
-BROWSER_NAME = "firefox"  # select the browser here (e.g. 'firefox, or 'chromium')
-INFOSCREEN_URL = "https://connected.rosenbauer.com/alarmmonitor/"
-INFOSCREEN_URL = "https://time.is/New_York"  # just for a test
-
-# timing parameters
-CYCLE_TIME = 0.2           # loop time in seconds
-TV_OVERRUN_TIME = 20       # time after tv should switch off in seconds
-TV_ON_BLOCK_TIME = 3       # time to block switch tv on after switching off the tv in seconds
-BROWSER_LOADING_TIME = 10  # wait to load the browser in seconds
+# load parameters from file
+from dotenv import dotenv_values
+config = dotenv_values(".env")
 
 # GPIO setup (if no pin is given, the TV will never switch of!)
 PIR_PIN = {    # GPIO pins for the HC-SR312 motion sensor's
-   4 : [
-      None          # 'None' use the local GPIO without pigpio
+   #4 : [
+      #None          # 'None' use the local GPIO without pigpio
       #'localhost'   # 'localhost' use the local GPIO with pigpio
       #'10.0.0.60'   # 'xx.xx.xx.xx' use the remot GPIO with pigpio
-      ]
+      #]
 }
 EXT_PIN = {    # GPIO pins for a external alarm input
-   2 : [
-      None          # 'None' use the local GPIO without pigpio
+   #2 : [
+      #None          # 'None' use the local GPIO without pigpio
       #'localhost'   # 'localhost' use the local GPIO with pigpio
       #'10.0.0.60'   # 'xx.xx.xx.xx' use the remot GPIO with pigpio
-      ]
+      #]
 }
 
 # logging into a file
-LOGFILE_NAME = f"infoscreen_logfile_{time.strftime('%Y')}.log"   # filename for the logfile
+LOGFILE_NAME = config['LOGFILE_NAME'] + f"_{time.strftime('%Y')}.log"   # filename for the logfile
 LOGFILE_PATH = os.path.join(os.path.dirname(__file__), "logfiles", LOGFILE_NAME)    # full file path
 
 os.makedirs(os.path.dirname(LOGFILE_PATH), exist_ok=True)   # create a logfile folder if it doesn't exist
 
 logging.basicConfig(
    format="%(asctime)s [%(levelname)s] %(message)s",
-   level=logging.DEBUG,
    handlers=[
       logging.FileHandler(LOGFILE_PATH, 'a'),
       logging.StreamHandler()
    ]
 )
+logging.root.setLevel(config['LOGLEVEL'].upper())
 
 # catch termination signal here for gracefully shutdown
 def signal_handler(signum, frame):
@@ -196,10 +189,10 @@ def main():
       logging.warning("No display founded!")
 
    # try to open browser in kiosk mode
-   if open_browser(BROWSER_NAME, INFOSCREEN_URL, BROWSER_LOADING_TIME, session_type, disp):
-      logging.info(f"{BROWSER_NAME.capitalize()} is opened.")
+   if open_browser(config['BROWSER_NAME'], config['INFOSCREEN_URL'], BROWSER_LOADING_TIME, session_type, disp):
+      logging.info(f"{config['BROWSER_NAME'].capitalize()} is opened.")
    else:
-      logging.warning(f"{BROWSER_NAME.capitalize()} is not opened!")
+      logging.warning(f"{config['BROWSER_NAME'].capitalize()} is not opened!")
 
    try:
       while True:
@@ -218,16 +211,16 @@ def main():
          elif tv_state and not blocked and (motion_detected or ext_alarm_detected or never_switch_off):     # don't switch tv off until a motion or external alarm detected! 
             start_time = current_time
 
-         if tv_state and (current_time - start_time >= TV_OVERRUN_TIME):  # switch tv off
+         if tv_state and (current_time - start_time >= int(config['TV_OVERRUN_TIME'])):  # switch tv off
             turn_tv_off(disp)
             tv_state = False
             blocked = True
             start_time = current_time
 
-         if blocked and (current_time - start_time >= TV_ON_BLOCK_TIME):
+         if blocked and (current_time - start_time >= int(config['TV_ON_BLOCK_TIME'])):
             blocked = False
 
-         time.sleep(CYCLE_TIME)
+         time.sleep(int(config['CYCLE_TIME']))
 
    except KeyboardInterrupt:
       logging.info("The programm is stopped by the user!")
@@ -238,8 +231,8 @@ def main():
 
    finally:
       # close the browser
-      close_browser(BROWSER_NAME)
-      logging.info(f"{BROWSER_NAME.capitalize()} browser is closing.")
+      close_browser(config['BROWSER_NAME'])
+      logging.info(f"{config['BROWSER_NAME'].capitalize()} browser is closing.")
    
       # gpio cleanup
       del motion_sensors
