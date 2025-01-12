@@ -42,7 +42,7 @@ If you need this, follow the instructions: https://gpiozero.readthedocs.io/en/la
     [Desktop Entry]
     Type=Application
     Name=AlarmDisplayControl-Autostart
-    Exec=/usr/bin/python /home/pi/Desktop/AlarmDisplayControl/python/AlarmDisplayControl/AlarmDisplayControl.py
+    Exec=/usr/bin/python /home/pi/Desktop/AlarmDisplayControl/python/AlarmDisplayControl/main.py
     ```
     Save with `Ctrl`+`x`.
 
@@ -65,7 +65,7 @@ If you need this, follow the instructions: https://gpiozero.readthedocs.io/en/la
     Environment="XDG_RUNTIME_DIR=/run/user/1000"
     WorkingDirectory=/home/pi/Desktop/AlarmDisplayControl/python/AlarmDisplayControl
     ExecStartPre=/bin/sleep 5
-    ExecStart=/usr/bin/python AlarmDisplayControl.py
+    ExecStart=/usr/bin/python main.py
 
     [Install]
     WantedBy=graphical.target
