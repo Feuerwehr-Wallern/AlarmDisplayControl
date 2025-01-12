@@ -11,7 +11,12 @@
 2.  Set up your specific Parameters in `.env`-File.
     ```env
     sudo nano .env
-    ```   
+    ```
+
+3.  Set up the GPIO pins in `main.py`.
+    ```env
+    sudo nano main.py
+    ```
 
 ## Used GPIO Libary
 Doc:  https://gpiozero.readthedocs.io/
