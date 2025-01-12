@@ -4,7 +4,7 @@
 ## Parameter settings
 1.  Copy the `.env.example`-File and rename it to `.env`.
     ```env
-    cd /AlarmDisplayControl/python/AlarmDisplayControl
+    cd AlarmDisplayControl/python/AlarmDisplayControl
     cp .env.example .env
     ```
 
