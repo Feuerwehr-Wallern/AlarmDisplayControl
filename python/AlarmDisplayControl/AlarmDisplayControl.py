@@ -106,6 +106,7 @@ def open_browser(browser:str, url:str, wait:float, session_type:str, disp:str) -
       cmd += " --noerrdialogs"
       cmd += " --disable-infobars"
       cmd += " --disable-translate"
+      cmd += " --disable-restore-session-state"
    
       cmd += f" {url}"
 
@@ -172,29 +173,28 @@ def main():
    motion_sensors = MotionSensor_Handler(PIR_PIN)  # instance for motion sensors
    ext_alarm_sensors = Button_Handler(EXT_PIN)     # instance for external inputs
 
-
-   logging.info("TV infoscreen programm is started!")
-
-   never_switch_off = False   # if True, the tv will never switch off by the programm
-   if not PIR_PIN and not EXT_PIN:
-      never_switch_off = True
-      logging.info("TV will never switch of by the program, because no sensor pins are given!")
-
-   # find session type and display here
-   session_type = find_session()
-   disp = find_display(session_type)
-   if disp:
-      logging.info(f"Founded session: {session_type}, Founded display: {disp}")
-   else:
-      logging.warning("No display founded!")
-
-   # try to open browser in kiosk mode
-   if open_browser(config['BROWSER_NAME'], config['INFOSCREEN_URL'], float(config['BROWSER_LOADING_TIME']), session_type, disp):
-      logging.info(f"{config['BROWSER_NAME'].capitalize()} is opened.")
-   else:
-      logging.warning(f"{config['BROWSER_NAME'].capitalize()} is not opened!")
-
    try:
+      logging.info("TV infoscreen programm is started!")
+
+      never_switch_off = False   # if True, the tv will never switch off by the programm
+      if not PIR_PIN and not EXT_PIN:
+         never_switch_off = True
+         logging.info("TV will never switch of by the program, because no sensor pins are given!")
+
+      # find session type and display here
+      session_type = find_session()
+      disp = find_display(session_type)
+      if disp:
+         logging.info(f"Founded session: {session_type}, Founded display: {disp}")
+      else:
+         logging.warning("No display founded!")
+
+      # try to open browser in kiosk mode
+      if open_browser(config['BROWSER_NAME'], config['INFOSCREEN_URL'], float(config['BROWSER_LOADING_TIME']), session_type, disp):
+         logging.info(f"{config['BROWSER_NAME'].capitalize()} is opened.")
+      else:
+         logging.warning(f"{config['BROWSER_NAME'].capitalize()} is not opened!")
+
       while True:
          current_time = time.time()
 
