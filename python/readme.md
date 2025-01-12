@@ -1,6 +1,18 @@
 # python adaptation of arduino code
 
 
+## Parameter settings
+1.  Copy the `.env.example`-File and rename it to `.env`.
+    ```env
+    cd /AlarmDisplayControl/python/AlarmDisplayControl
+    cp .env.example .env
+    ```
+
+2.  Set up your specific Parameters in `.env`-File.
+    ```env
+    sudo nano .env
+    ```   
+
 ## Used GPIO Libary
 Doc:  https://gpiozero.readthedocs.io/
 
