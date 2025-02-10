@@ -6,6 +6,7 @@ Author: HBM d.F. Stefan Pflüglmayer
 Author: OBI Robert Kronawettleitner
 '''
 
+import logging.handlers
 import os
 import signal
 import time
@@ -187,6 +188,7 @@ def main():
       if disp:
          logging.info(f"Founded session: {session_type}, Founded display: {disp}")
       else:
+         logging.debug(f"Founded session: {session_type}, Founded display: {disp}")
          logging.warning("No display founded!")
 
       # try to open browser in kiosk mode
