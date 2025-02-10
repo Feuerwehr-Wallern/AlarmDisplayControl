@@ -80,15 +80,17 @@ def turn_tv_off(way_disp:str):
 def open_browser(browser:str, url:str, wait:float, session_type:str, disp:str) -> bool:
    close_browser(browser)   # close browser if it is already open
 
-   if not disp:
-      logging.warning("Can't open the browser, because no display given!")
+   if not session_type:
+      logging.warning("Can't open the browser, because no session type is given!")
+      return False
+
+   if not disp :
+      logging.warning("Can't open the browser, because no display is given!")
       return False
 
    if os.name == "posix":
       if session_type == 'x11':
-         # todo
-         logging.warning("Open browser is not implemented for x11 sessions yet!")
-         return False
+          cmd = f"DISPLAY=:{disp} "
       else:
          cmd = f"WAYLAND_DISPLAY=\"{disp}\" "   # default wayland
 
@@ -138,9 +140,9 @@ def close_browser(browser:str):
 def find_display(session_type:str | None) -> str | None:
    if os.name == "posix":
       if session_type == 'x11':
-         # todo
-         logging.warning("Can't return a display because it's not implemented for x11 sessions yet!")
-         return None
+         # todo find out the correct display
+         logging.warning("Use always display 0 when session type is x11!")
+         return '0'
       else:
          XDG_RUNTIME_DIR = f"/run/user/{os.getuid()}"
 
@@ -159,7 +161,10 @@ def find_display(session_type:str | None) -> str | None:
 def find_session() -> str | None:
    if os.name == "posix":
       XDG_SESSION_TYPE = os.environ.get('XDG_SESSION_TYPE')
-      return XDG_SESSION_TYPE
+      if XDG_SESSION_TYPE:
+         return XDG_SESSION_TYPE
+      else:
+         return 'x11'   # return x11 display for default here if the XDG_SESSION_TYPE isn't set
    
    elif os.name == "nt":
       pass    # todo
