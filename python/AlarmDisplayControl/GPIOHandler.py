@@ -42,9 +42,9 @@ class Button_Handler(GPIO_Handler):
         super().__init__()
         self.pins = pins
                 
-        for pin in self.pins:
-            for ip in self.pins[pin]:
-                if ip is None:
+        for ip in self.pins:
+            for pin in self.pins[ip]:
+                if ip is None or ip == "local":
                     device = Button(
                         pin,
                         active_state=active_state,
@@ -84,9 +84,9 @@ class MotionSensor_Handler(GPIO_Handler):
         super().__init__()
         self.pins = pins
         
-        for pin in self.pins:
-            for ip in self.pins[pin]:
-                if ip is None:
+        for ip in self.pins:
+            for pin in self.pins[ip]:
+                if ip is None or ip == "local":
                     device = MotionSensor(
                         pin,
                         active_state=active_state,

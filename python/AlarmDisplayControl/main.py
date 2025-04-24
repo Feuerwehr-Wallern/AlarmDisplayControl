@@ -11,28 +11,18 @@ import os
 import signal
 import time
 import logging
+import json
 import subprocess
+from dotenv import dotenv_values
 from GPIOHandler import MotionSensor_Handler, Button_Handler
 
 # load parameters from file
-from dotenv import dotenv_values
-config = dotenv_values(".env")
+CONFIGFILE_PATH = os.path.join(os.path.dirname(__file__), ".env")
+config = dotenv_values(CONFIGFILE_PATH)
 
-# GPIO setup (if no pin is given, the TV will never switch of!)
-PIR_PIN = {    # GPIO pins for the HC-SR312 motion sensor's
-   #4 : [
-      #None          # 'None' use the local GPIO without pigpio
-      #'localhost'   # 'localhost' use the local GPIO with pigpio
-      #'10.0.0.60'   # 'xx.xx.xx.xx' use the remot GPIO with pigpio
-      #]
-}
-EXT_PIN = {    # GPIO pins for a external alarm input
-   #2 : [
-      #None          # 'None' use the local GPIO without pigpio
-      #'localhost'   # 'localhost' use the local GPIO with pigpio
-      #'10.0.0.60'   # 'xx.xx.xx.xx' use the remot GPIO with pigpio
-      #]
-}
+# load gpio settings
+PIR_PIN = json.loads(config['PIR_PIN'])
+EXT_PIN = json.loads(config['EXT_PIN'])
 
 # logging into a file
 LOGFILE_NAME = config['LOGFILE_NAME'] + f"_{time.strftime('%Y')}.log"   # filename for the logfile
