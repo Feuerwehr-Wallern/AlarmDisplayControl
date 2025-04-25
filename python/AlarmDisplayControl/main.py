@@ -39,6 +39,10 @@ logging.basicConfig(
 )
 logging.root.setLevel(config['LOGLEVEL'].upper())
 
+# helper for converting a string into a bool
+def to_bool(s:str):
+    return s.lower() == "true"
+
 # catch termination signal here for gracefully shutdown
 def signal_handler(signum, frame):
    exit(0)  # exit here
@@ -127,7 +131,13 @@ def open_browser(browser:str, url:str, wait:float, session_type:str, disp:str) -
 # Function to close Firefox
 def close_browser(browser:str):
    if os.name == "posix":
-      os.system(f"pkill {browser.lower()}")
+      cmd = f"pkill {browser.lower()}"
+
+      logging.info(f"{browser.capitalize()} is closed.")
+      logging.debug(cmd)
+
+      os.system(cmd)
+      
    elif os.name == "nt":
       pass  # todo
 
@@ -204,7 +214,8 @@ def main():
          # timing algorithm to switch the tv
          if not tv_state and not blocked and (motion_detected or ext_alarm_detected):   # switch tv on
             turn_tv_on(disp)
-            open_browser(config['BROWSER_NAME'], config['INFOSCREEN_URL'], float(config['BROWSER_LOADING_TIME']), session_type, disp)
+            if to_bool(config['BROWSER_REOPEN']):
+               open_browser(config['BROWSER_NAME'], config['INFOSCREEN_URL'], float(config['BROWSER_LOADING_TIME']), session_type, disp)
             tv_state = True
             start_time = current_time
       
