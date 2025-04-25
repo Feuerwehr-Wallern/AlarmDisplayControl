@@ -76,7 +76,7 @@ If you need this, follow the instructions: https://gpiozero.readthedocs.io/en/la
     User=pi
     Environment="XDG_RUNTIME_DIR=/run/user/1000"
     WorkingDirectory=/home/pi/Desktop/AlarmDisplayControl/python/AlarmDisplayControl
-    ExecStartPre=/bin/sleep 5
+    #ExecStartPre=/bin/sleep 5
     ExecStart=/usr/bin/python main.py
 
     [Install]

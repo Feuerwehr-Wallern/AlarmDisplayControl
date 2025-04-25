@@ -137,7 +137,7 @@ def close_browser(browser:str):
       logging.debug(cmd)
 
       os.system(cmd)
-      
+
    elif os.name == "nt":
       pass  # todo
 
@@ -169,7 +169,7 @@ def find_session() -> str | None:
       if XDG_SESSION_TYPE:
          return XDG_SESSION_TYPE
       else:
-         return 'x11'   # return x11 display for default here if the XDG_SESSION_TYPE isn't set
+         return 'wayland'   # return 'wayland' as default display here if the XDG_SESSION_TYPE isn't set
    
    elif os.name == "nt":
       pass    # todo
