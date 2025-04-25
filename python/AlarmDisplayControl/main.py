@@ -48,10 +48,13 @@ def signal_handler(signum, frame):
    exit(0)  # exit here
 signal.signal(signal.SIGTERM, signal_handler)
 
-# Function to turn HDMI output on
-def turn_tv_on(way_disp:str):
+# Function to turn TV on
+def turn_tv_on(way_disp:str, switching_method:str = "default"):
    if os.name == "posix":
-      cmd = f"WAYLAND_DISPLAY=\"{way_disp}\" wlr-randr --output HDMI-A-1 --on"
+      if switching_method.lower() == "default":
+         cmd = f"WAYLAND_DISPLAY=\"{way_disp}\" wlr-randr --output HDMI-A-1 --on"
+      elif switching_method.lower() == "cec":
+         pass  # todo
       
       logging.info("TV monitor is switched ON.")
       logging.debug(cmd)
@@ -59,10 +62,13 @@ def turn_tv_on(way_disp:str):
    elif os.name == "nt":
       pass  # todo
 
-# Function to turn HDMI output off
-def turn_tv_off(way_disp:str):
+# Function to turn TV off
+def turn_tv_off(way_disp:str, switching_method:str = "default"):
    if os.name == "posix":
-      cmd = f"WAYLAND_DISPLAY=\"{way_disp}\" wlr-randr --output HDMI-A-1 --off"
+      if switching_method.lower() == "default":
+         cmd = f"WAYLAND_DISPLAY=\"{way_disp}\" wlr-randr --output HDMI-A-1 --off"
+      elif switching_method.lower() == "cec":
+         pass  # todo
 
       logging.info("TV monitor is switched OFF.")
       logging.debug(cmd)
@@ -179,6 +185,7 @@ def find_session() -> str | None:
 def main():
    tv_state = True            # init state of tv
    blocked = False            # init state blocking turn on
+   never_switch_off = False   # init state tv never switch off by the programm
    start_time = time.time()   # start time in init state
    
    motion_sensors = MotionSensor_Handler(PIR_PIN)  # instance for motion sensors
@@ -187,7 +194,7 @@ def main():
    try:
       logging.info("TV infoscreen programm is started!")
 
-      never_switch_off = False   # if True, the tv will never switch off by the programm
+      # check if gpio pins are given or not (if True, the tv will never switch off by the programm)   
       if not PIR_PIN and not EXT_PIN:
          never_switch_off = True
          logging.info("TV will never switch of by the program, because no sensor pins are given!")
@@ -213,7 +220,7 @@ def main():
 
          # timing algorithm to switch the tv
          if not tv_state and not blocked and (motion_detected or ext_alarm_detected):   # switch tv on
-            turn_tv_on(disp)
+            turn_tv_on(disp, config['TV_SWITCHING_METHOD'])
             if to_bool(config['BROWSER_REOPEN']):
                open_browser(config['BROWSER_NAME'], config['INFOSCREEN_URL'], float(config['BROWSER_LOADING_TIME']), session_type, disp)
             tv_state = True
@@ -223,7 +230,7 @@ def main():
             start_time = current_time
 
          if tv_state and (current_time - start_time >= float(config['TV_OVERRUN_TIME'])):  # switch tv off
-            turn_tv_off(disp)
+            turn_tv_off(disp, config['TV_SWITCHING_METHOD'])
             tv_state = False
             blocked = True
             start_time = current_time
