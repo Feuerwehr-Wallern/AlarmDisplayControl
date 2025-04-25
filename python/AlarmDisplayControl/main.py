@@ -87,9 +87,9 @@ def open_browser(browser:str, url:str, wait:float, session_type:str, disp:str) -
       if browser.lower() == "firefox":
          if session_type == 'x11':
             cmd += f"{browser.lower()} --kiosk"
-            cmd += " --private-window"
          else:
             cmd += f"{browser.lower()} --kiosk-monitor {disp}"
+         cmd += " --private-window"
       elif browser.lower() == "chromium":
          cmd += f"{browser.lower()} --kiosk"
          cmd += " --incognito"
