@@ -6,7 +6,6 @@ Author: HBM d.F. Stefan Pflüglmayer
 Author: OBI Robert Kronawettleitner
 '''
 
-import logging.handlers
 import os
 import signal
 import time
