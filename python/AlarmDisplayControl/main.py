@@ -89,10 +89,8 @@ def open_browser(browser:str, url:str, wait:float, session_type:str, disp:str) -
             cmd += f"{browser.lower()} --kiosk"
          else:
             cmd += f"{browser.lower()} --kiosk-monitor {disp}"
-         cmd += " --private-window"
       elif browser.lower() == "chromium":
          cmd += f"{browser.lower()} --kiosk"
-         cmd += " --incognito"
       else:
          logging.info("No or wrong browser selected!")
          return False
@@ -102,6 +100,7 @@ def open_browser(browser:str, url:str, wait:float, session_type:str, disp:str) -
       cmd += " --disable-infobars"
       cmd += " --disable-translate"
       cmd += " --disable-restore-session-state"
+      cmd += " --private-window"
    
       cmd += f" {url}"
 
@@ -115,10 +114,14 @@ def open_browser(browser:str, url:str, wait:float, session_type:str, disp:str) -
             )
 
       time.sleep(wait)
+
+      logging.info(f"{browser.capitalize()} is opened.")
       return True
          
    elif os.name == "nt":
       pass  # todo
+
+   logging.warning(f"{config['BROWSER_NAME'].capitalize()} is not opened!")
    return False
 
 # Function to close Firefox
@@ -189,10 +192,7 @@ def main():
          logging.warning("No display founded!")
 
       # try to open browser in kiosk mode
-      if open_browser(config['BROWSER_NAME'], config['INFOSCREEN_URL'], float(config['BROWSER_LOADING_TIME']), session_type, disp):
-         logging.info(f"{config['BROWSER_NAME'].capitalize()} is opened.")
-      else:
-         logging.warning(f"{config['BROWSER_NAME'].capitalize()} is not opened!")
+      open_browser(config['BROWSER_NAME'], config['INFOSCREEN_URL'], float(config['BROWSER_LOADING_TIME']), session_type, disp)
 
       while True:
          current_time = time.time()
@@ -204,6 +204,7 @@ def main():
          # timing algorithm to switch the tv
          if not tv_state and not blocked and (motion_detected or ext_alarm_detected):   # switch tv on
             turn_tv_on(disp)
+            open_browser(config['BROWSER_NAME'], config['INFOSCREEN_URL'], float(config['BROWSER_LOADING_TIME']), session_type, disp)
             tv_state = True
             start_time = current_time
       
