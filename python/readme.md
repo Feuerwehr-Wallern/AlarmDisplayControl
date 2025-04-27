@@ -13,6 +13,14 @@
     sudo nano .env
     ```
 
+## HDMI-CEC Display Control
+If you use this feature, you have to install the following package.
+```env
+sudo apt-get install cec-utils
+```
+
+For more detail information see: https://pimylifeup.com/raspberrypi-hdmi-cec/
+
 ## Used GPIO Libary
 Doc:  https://gpiozero.readthedocs.io/
 
